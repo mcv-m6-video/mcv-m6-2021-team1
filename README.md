@@ -1,4 +1,4 @@
-# MCV-M6-2021-team1
+# MCV-M6-Video-Analysis
 
 # Team 1
 
