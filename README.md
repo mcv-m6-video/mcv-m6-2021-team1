@@ -4,8 +4,8 @@
 
 | Members | Contact |
 | :---         |   :---    | 
-| Aditya   | adityasangramsingh.rana@e-campus.uab.cat | 
-| German    | german.barquero@e-campus.uab.cat  |
-| Carmen    | carmen.garciano@e-campus.uab.cat,  |
-| Juan | juanvictor.chaves@e-campus.uab.cat, |
+| Aditya Sangram Singh Rana   | adityasangramsingh.rana@e-campus.uab.cat | 
+| German Barquero    | german.barquero@e-campus.uab.cat  |
+| Carmen García    | carmen.garciano@e-campus.uab.cat  |
+| Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
