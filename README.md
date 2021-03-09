@@ -1,6 +1,6 @@
 # MCV-M6-2021-team1
 
-# Team 6 
+# Team 1
 
 | Members | Contact |
 | :---         |   :---    | 
