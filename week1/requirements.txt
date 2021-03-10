@@ -1,8 +1,6 @@
-numpy==1.19.5
-opencv-python==4.5.1.48
-pandas==1.1.5
-matplotlib==3.3.4
 torch==1.7.1
 torchvision==0.8.2
-# detectron
-# pip install detectron2 -f https://dl.fbaipublicfiles.com/detectron2/wheels/cu100/index.html
+numpy==1.19.5
+opencv-python==4.5.1.48 
+pandas==1.1.5
+matplotlib==3.3.4
