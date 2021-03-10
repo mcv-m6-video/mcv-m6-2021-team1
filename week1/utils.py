@@ -112,7 +112,6 @@ def get_frame_iou(gt_rects, det_rects):
 
 
 def get_AP(gt_rects, det_rects):
-    """Our shot at Average precision"""
 
     correct = np.zeros(len(det_rects))
     conf = np.ones(len(det_rects)) # simulation of confidence levels
@@ -126,7 +125,7 @@ def get_AP(gt_rects, det_rects):
                 correct[i] = 1
                 previous_detections.add(j)
 
-    print('Scikit learn AP', average_precision_score(correct, conf, 'samples'))
+    # print('Scikit learn AP', average_precision_score(correct, conf, 'samples'))
 
     ac_correct = np.array([np.sum(correct[:i]) for i in range(1, len(det_rects))])
 
@@ -139,44 +138,18 @@ def get_AP(gt_rects, det_rects):
 
     # Interpolate
     interp_precision = []
-    val = precision[-1]
-    for i in range(len(precision) - 1, -1, -1):
-        if precision[i-1] > precision[i] :
-            val = precision[i]
-        interp_precision.insert(0, val)
-
-    sample = []
     sample_idx = np.linspace(0, 1, 11)
-    for value in sample_idx:
-        idx = min(range(len(sample_idx)), key=lambda i: abs(sample_idx[i]-value))
-        try:
-            sample.append(max(interp_precision[idx:]))
-        except ValueError:
-            sample.append(0)
-    
-    
-    i = len(recall) -2
-    # interpolation...
-    precision2=precision.copy()
-    while i>=0:
-        if precision[i+1]>precision[i]:
-            precision[i]=precision[i+1]
-        i=i-1
+ 
+    sample_values = []
+    for i in sample_idx:
+        cont = -1
+        for v in recall:
+            cont+=1
+            if v > i: 
+                break
+        sample_values.append(precision[cont])
 
-    # plotting...
-    # fig, ax = plt.subplots()
-    # for i in range(recall.shape[0]-1):
-    #     ax.plot((recall[i],recall[i]),(precision[i],precision[i+1]),'k-',label='',color='red') #vertical
-    #     ax.plot((recall[i],recall[i+1]),(precision[i+1],precision[i+1]),'k-',label='',color='red') #horizontal
-    # plt.plot(precision, recall)
-    # plt.scatter(np.linspace(0, 1, 11), sample)
-
-    # plt.xlim([0, 1])
-    # plt.ylim([0, 1])
-    # ax.set_xlabel("Recall")
-    # ax.set_ylabel("Precision")
-    # # plt.savefig('fig.jpg')
-    # plt.show()
+    return np.mean(sample_values)
 
 
 def rectangle_mot_format(img, left, top, width, height, color, thickness=None, conf=1, id=1):

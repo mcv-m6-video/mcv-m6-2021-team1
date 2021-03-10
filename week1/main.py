@@ -38,8 +38,10 @@ def main():
     # Render video
     cap = cv2.VideoCapture(VIDEO_PATH)
     miou_over_time = []
+    map_over_time = []
     frame_cont = 0
     ret, frame = cap.read()
+
     while(ret):
     
         gt_rects = gt_all_rects.get(frame_cont, None)
@@ -56,8 +58,9 @@ def main():
         if gt_rects and det_rects:
             miou = utils.get_frame_iou(gt_rects, det_rects)
             miou_over_time.append(miou)
-            utils.get_AP(gt_rects, det_rects)
-            print('Frame', frame_cont, 'iou:', miou)
+            ap = utils.get_AP(gt_rects, det_rects)
+            map_over_time.append(ap)
+            print('Frame', frame_cont, 'iou:', miou, 'ap:', ap)
         else:
             miou_over_time.append(miou)
         
