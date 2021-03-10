@@ -27,7 +27,7 @@ DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_ssd512.txt'
 
 RUN_NAME = 'noisy-none'
 noisy = False
-show = False
+show = True
 save=False
 
 def main():
@@ -54,6 +54,7 @@ def main():
     frame_cont = 0
     ret, frame = cap.read()
 
+    wait_time = 1
     while(ret):
     
         gt_rects = gt_all_rects.get(frame_cont, None)
@@ -61,11 +62,11 @@ def main():
 
         if gt_rects:
             for r in gt_rects:
-                frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 255, 0))
+                frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 255, 0), 2)
 
         if det_rects:
             for r in det_rects:
-                frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 0, 255))
+                frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 0, 255), 2)
 
         # print('Frame',  frame_cont)
         if gt_rects and det_rects: # If we can compute the metrics, just skip
@@ -79,8 +80,13 @@ def main():
 
         if show:
             cv2.imshow('frame',display_frame)
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            k = cv2.waitKey(wait_time)
+            if k == ord('q'):
                 break
+            elif k == ord('s'):
+                cv2.imwrite(f'save_{frame_cont}.png', display_frame)
+            elif k == ord('p'):
+                wait_time = int(not(bool(wait_time)))
         
         if save:
             plt.figure()
