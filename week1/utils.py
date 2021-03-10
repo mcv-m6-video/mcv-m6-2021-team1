@@ -122,19 +122,19 @@ def get_AP(gt_rects, det_rects):
         for j, gt in enumerate(gt_rects):
             iou = get_rect_iou(det, gt)
 
-            if iou > 0.5 and j not in previous_detections:
+            if iou > 0.5 and (j not in previous_detections):
                 correct[i] = 1
                 previous_detections.add(j)
 
     # print('Scikit learn AP', average_precision_score(correct, conf, 'samples'))
 
-    ac_correct = np.array([np.sum(correct[:i]) for i in range(1, len(det_rects))])
+    acumulated_correct = np.array([np.sum(correct[:i]) for i in range(1, len(det_rects)+1)])
 
-    precision = ac_correct / (np.array(range(len(ac_correct)))+1)
-    recall = ac_correct / len(gt_rects)
+    precision = acumulated_correct / (np.array(range(len(acumulated_correct)))+1)
+    recall = acumulated_correct / len(gt_rects)
 
     # Values at infinity
-    precision = np.hstack([precision, 0])
+    precision = np.hstack([precision, 0]) # TODO: Should this be done or not? If not, very bigrcnn-high-pa
     recall = np.hstack([recall, 1])
 
     # Interpolate
@@ -149,6 +149,10 @@ def get_AP(gt_rects, det_rects):
             if v > i: 
                 break
         sample_values.append(precision[cont])
+    
+    # plt.plot(recall, precision, 'g')
+    # plt.scatter(sample_idx, sample_values)
+    # plt.show()
 
     return np.mean(sample_values)
 

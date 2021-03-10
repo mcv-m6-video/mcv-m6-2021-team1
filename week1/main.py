@@ -6,7 +6,7 @@ import os
 import cv2
 import numpy as np
 import utils
-
+import pickle as pkl
 from matplotlib.pyplot import Figure
 from matplotlib import pyplot as plt
 from matplotlib.backends.backend_agg import FigureCanvasAgg as FigureCanvas
@@ -16,16 +16,16 @@ annotations_file = '../../data/ai_challenge_s03_c010-full_annotation.xml'
 VIDEO_PATH = '../../data/AICity_data/train/S03/c010/vdo.avi'
 GT_PATH = '../../data/AICity_data/train/S03/c010/gt/gt.txt'
 
-RUN_NAME = 'rcnn'
+RUN_NAME = 'rcnn-plot-test'
 DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_mask_rcnn.txt'
 
-RUN_NAME = 'ssd'
+RUN_NAME = 'ssd-low-pa'
 DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_ssd512.txt'
 
-RUN_NAME = 'yolo'
-DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_yolo3.txt'
+# RUN_NAME = 'yolo-low-pa'
+# DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_yolo3.txt'
 
-# RUN_NAME = 'noisy'
+RUN_NAME = 'noisy-none'
 noisy = False
 show = False
 save=False
@@ -37,10 +37,10 @@ def main():
 
     gt_all_rects = utils.parse_xml_rects(annotations_file)
 
-    tol_dropout = 0.1
-    std_pos = 0.1
-    std_size = 0.15
-    std_ar = 0.3
+    tol_dropout = 0.
+    std_pos = 0.
+    std_size = 0.
+    std_ar = 0.
 
     if noisy:
         det_all_rects = utils.generate_noisy_bboxes(gt_all_rects, tol_dropout, std_pos, std_size, std_ar)
@@ -67,16 +67,17 @@ def main():
             for r in det_rects:
                 frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 0, 255))
 
-        if gt_rects and det_rects:
+        # print('Frame',  frame_cont)
+        if gt_rects and det_rects: # If we can compute the metrics, just skip
             miou = utils.get_frame_iou(gt_rects, det_rects)
             miou_over_time.append(miou)
             ap = utils.get_AP(gt_rects, det_rects)
             map_over_time.append(ap)
-            # print('Frame', frame_cont, 'iou:', miou, 'ap:', ap)
+            # print('iou:', miou, 'ap:', ap)
         
         display_frame = cv2.resize(frame, tuple(np.int0(0.5*np.array(frame.shape[:2][::-1]))))
 
-        if show:        
+        if show:
             cv2.imshow('frame',display_frame)
             if cv2.waitKey(1) & 0xFF == ord('q'):
                 break
@@ -117,6 +118,9 @@ def main():
     plt.title(f'Mean IoU over time for {RUN_NAME} data')
     plt.savefig(f'runs/{RUN_NAME}_iou_plt_final.png')
 
+    with open(f'runs/{RUN_NAME}_iou_raw.pkl', 'wb') as f:
+        pkl.dump(miou_over_time, f)
+
     plt.figure()
     plt.plot(map_over_time)
     plt.xlim([0, 2140])
@@ -125,5 +129,8 @@ def main():
     plt.ylabel('mean AP')
     plt.title('Mean Average Precision over time for {RUN_NAME} data')
     plt.savefig(f'runs/{RUN_NAME}_map_plt_final.png')
+
+    with open(f'runs/{RUN_NAME}_map_raw.pkl', 'wb') as f:
+        pkl.dump(map_over_time, f)
 
 main()
