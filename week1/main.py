@@ -22,10 +22,10 @@ DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_mask_rcnn.txt'
 RUN_NAME = 'ssd-low-pa'
 DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_ssd512.txt'
 
-# RUN_NAME = 'yolo-low-pa'
-# DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_yolo3.txt'
+RUN_NAME = 'yolo-low-pa'
+DET_PATH = '../../data/AICity_data/train/S03/c010/det/det_yolo3.txt'
 
-RUN_NAME = 'noisy-none'
+RUN_NAME = 'new-ap-yolo'
 noisy = False
 show = True
 save=False
@@ -57,23 +57,22 @@ def main():
     wait_time = 1
     while(ret):
     
-        gt_rects = gt_all_rects.get(frame_cont, None)
-        det_rects = det_all_rects.get(frame_cont, None)
+        gt_rects = gt_all_rects.get(f'f_{frame_cont}', None)
+        det_rects = det_all_rects.get(f'f_{frame_cont}', None)
 
         if gt_rects:
             for r in gt_rects:
                 frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 255, 0), 2)
 
         if det_rects:
-            for r in det_rects:
+            for obj in det_rects:
+                r = obj['bbox']
                 frame = cv2.rectangle(frame, (int(r[0]), int(r[1])),  (int(r[2]), int(r[3])), (0, 0, 255), 2)
 
         # print('Frame',  frame_cont)
         if gt_rects and det_rects: # If we can compute the metrics, just skip
             miou = utils.get_frame_iou(gt_rects, det_rects)
             miou_over_time.append(miou)
-            ap = utils.get_AP(gt_rects, det_rects)
-            map_over_time.append(ap)
             # print('iou:', miou, 'ap:', ap)
         
         display_frame = cv2.resize(frame, tuple(np.int0(0.5*np.array(frame.shape[:2][::-1]))))
@@ -110,10 +109,11 @@ def main():
     cap.release()
     cv2.destroyAllWindows()
 
-    mAP = np.mean(map_over_time)
+    mAP = utils.get_AP(gt_all_rects, det_all_rects)
+
     mIOU = np.mean(miou_over_time)
 
-    print(f'Mean statistics for {RUN_NAME}:\nmAP: {mAP}\nmIOU: {mIOU}')
+    print(f'Mean statistics for {RUN_NAME}:\nmAP: {mAP}\nmIOU: {mIOU})')
 
     plt.figure()
     plt.plot(miou_over_time)
@@ -127,16 +127,16 @@ def main():
     with open(f'runs/{RUN_NAME}_iou_raw.pkl', 'wb') as f:
         pkl.dump(miou_over_time, f)
 
-    plt.figure()
-    plt.plot(map_over_time)
-    plt.xlim([0, 2140])
-    plt.ylim([0, 1])
-    plt.xlabel('# Frame')
-    plt.ylabel('mean AP')
-    plt.title('Mean Average Precision over time for {RUN_NAME} data')
-    plt.savefig(f'runs/{RUN_NAME}_map_plt_final.png')
+    # plt.figure()
+    # plt.plot(map_over_time)
+    # plt.xlim([0, 2140])
+    # plt.ylim([0, 1])
+    # plt.xlabel('# Frame')
+    # plt.ylabel('mean AP')
+    # plt.title('Mean Average Precision over time for {RUN_NAME} data')
+    # plt.savefig(f'runs/{RUN_NAME}_map_plt_final.png')
 
-    with open(f'runs/{RUN_NAME}_map_raw.pkl', 'wb') as f:
-        pkl.dump(map_over_time, f)
+    # with open(f'runs/{RUN_NAME}_map_raw.pkl', 'wb') as f:
+    #     pkl.dump(map_over_time, f)
 
 main()
