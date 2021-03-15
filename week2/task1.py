@@ -28,7 +28,7 @@ def main(args):
     model_frames = int(args.percentage * TOTAL_FRAMES)
 
     if args.model == "gm":
-        model = GaussianModel(VIDEO_PATH, model_frames, ALPHA, f"{args.percentage}")
+        model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, f"{args.percentage}")
         MODEL_NAME = "GaussianModel"
     elif args.model == "agm":
         model = AdaptiveGaussianModel(VIDEO_PATH, model_frames, args.alpha, args.p, f"{args.percentage}")
@@ -61,6 +61,7 @@ def main(args):
 
     print(f"DONE! {counter} frames processed")
     writer.close()
+    print(f"Saved to '{results_path}'")
 
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
