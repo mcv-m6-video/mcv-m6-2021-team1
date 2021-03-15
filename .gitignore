@@ -8,3 +8,7 @@ __pycache__/
 #vs-code
 .vscode
 
+*/results/
+*/checkpoints/
+*/__pycache__/
+
