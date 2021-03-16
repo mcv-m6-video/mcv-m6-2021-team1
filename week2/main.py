@@ -142,7 +142,7 @@ def main(args):
 
     foreground, I = model.compute_next_foreground()
     writer.append_data(foreground)
-    counter = int(TOTAL_FRAMES*args.perc)
+    counter = int(TOTAL_FRAMES*args.percentage)
     det_rects = {}
     gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True) 
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
