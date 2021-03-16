@@ -111,11 +111,11 @@ def main(mode, run_name, noisy_config=None, display=False, save=False):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
-    parser.add_argument('-m', '--mode', required=True, type=str)
-    parser.add_argument('-n', '--name', required=True, type=str)
-    parser.add_argument('-d', '--display', action='store_const', const=True, default=False)
-    parser.add_argument('-s', '--save', action='store_const', const=True, default=False)
-    parser.add_argument('--noise', type=str, help='Format drop-pos-size-ar')
+    parser.add_argument('-m', '--mode', required=True, type=str, help='yolo, rcnn or ssd')
+    parser.add_argument('-n', '--name', required=True, type=str, help='Storage older name')
+    parser.add_argument('-d', '--display', action='store_const', const=True, default=False, help='Whether to display the video or not')
+    parser.add_argument('-s', '--save', action='store_const', const=True, default=False, help='Wheter to save frames and graphics for each of them or not')
+    parser.add_argument('--noise', type=str, help='Noise addition configuration. Format drop-pos-size-ar')
 
     args = parser.parse_args()
 
