@@ -132,7 +132,7 @@ class GaussianModel(Model):
             return None
 
         I = cv2.cvtColor(I, self.color_transform)
-        return (abs(I - self.mean) >= self.alpha * (self.std + 2)).astype(np.uint8) * 255
+        return (abs(I - self.mean) >= self.alpha * (self.std + 2)).astype(np.uint8) * 255, I
 
     def save_checkpoint(self):
         """
@@ -209,7 +209,7 @@ class AdaptiveGaussianModel(Model):
         aux = (I - self.mean)
         self.std[bm] = np.sqrt(self.p * aux[bm] * aux[bm] + (1 - self.p) * (self.std[bm] * self.std[bm]))
 
-        return (I - self.mean >= self.alpha * (self.std + 2)).astype(np.uint8) * 255
+        return (I - self.mean >= self.alpha * (self.std + 2)).astype(np.uint8) * 255, I
 
     def save_checkpoint(self):
         """
