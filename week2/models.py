@@ -256,7 +256,7 @@ class Sota(Model):
         elif method == "gsoc":
             self.method = cv2.bgsegm.createBackgroundSubtractorGSOC()
         elif method == "knn":
-            self.method = cv2.bgsegm.createBackgroundSubtractorKNN()
+            self.method = cv2.createBackgroundSubtractorKNN()
         else:
             raise Exception
 
