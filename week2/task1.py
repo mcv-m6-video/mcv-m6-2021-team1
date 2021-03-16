@@ -28,17 +28,19 @@ def main(args):
     model_frames = int(args.percentage * TOTAL_FRAMES)
 
     if args.model == "gm":
-        model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, f"{args.percentage}")
+        model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, \
+                                checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
         MODEL_NAME = "GaussianModel"
     elif args.model == "agm":
-        model = AdaptiveGaussianModel(VIDEO_PATH, model_frames, args.alpha, args.p, f"{args.percentage}")
+        model = AdaptiveGaussianModel(VIDEO_PATH, model_frames, args.alpha, args.p, \
+                                checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
         MODEL_NAME = "AdaptiveGaussianModel"
     else:
         raise Exception
 
     model.model_background()
 
-    results_path = f"results/{MODEL_NAME}/{args.alpha}_{args.percentage}"
+    results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.alpha}_{args.percentage}"
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     writer = imageio.get_writer(f"{results_path}/video.mp4", fps=25)
@@ -53,8 +55,8 @@ def main(args):
         counter += 1
 
         foreground = model.compute_next_foreground()
-        if counter % 500 == 0:
-            print(f"[{counter}]")
+        if counter % 100 == 0:
+            print(f"{counter} frames processed...")
 
         if args.max != -1 and counter >= args.max:
             break
@@ -66,9 +68,10 @@ def main(args):
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
 parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm"], help="model used for background modeling")
+parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv"], help="colorspace used for background modeling")
 parser.add_argument('-M', '--max', type=int, default=-1, help="max of frames for which infer foreground")
 parser.add_argument('-perc', '--percentage', type=float, default=0.25, help="percentage of video to use for background modeling")
-parser.add_argument('-a', '--alpha', type=float, default=11, help="alpha value")
+parser.add_argument('-a', '--alpha', metavar='N', nargs='+', type=float, default=11, help="alpha value")
 parser.add_argument('-p', '--p', type=float, default=0.001, help="[AdaptiveGaussianModel] parameter controlling the inclusion of new information to model")
 args = parser.parse_args()
 

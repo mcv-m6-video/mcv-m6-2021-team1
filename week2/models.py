@@ -3,6 +3,7 @@ import numpy as np
 import cv2
 import os
 import matplotlib.pyplot as plt
+from tqdm import tqdm
 
 """
 IDEAS:
@@ -11,12 +12,34 @@ IDEAS:
 """
 
 class Model:
-    def __init__(self, video_path, num_frames, checkpoint):
+    def __init__(self, video_path, num_frames, checkpoint, colorspace="gray"):
         self.cap = cv2.VideoCapture(video_path)
         self.images = None
         self.modeled = False
         self.num_frames = num_frames
         self.checkpoint = checkpoint
+        self.channels = 3
+
+        if colorspace == "gray":
+            self.color_transform = cv2.COLOR_BGR2GRAY
+            self.channels = 1
+        elif colorspace == "hsv":
+            self.color_transform = cv2.COLOR_BGR2HSV
+        elif colorspace == "rgb":
+            self.color_transform = cv2.COLOR_BGR2RGB
+        else:
+            raise Exception
+
+    def __add_image(self, frame, pos):
+        if len(frame.shape) == 2:
+            if self.images is None:
+                self.images = np.zeros((frame.shape[0], frame.shape[1], self.num_frames))
+            self.images[:,:, pos] = frame
+            return
+
+        if self.images is None:
+            self.images = np.zeros((frame.shape[0], frame.shape[1], self.channels, self.num_frames))
+        self.images[:,:,:, pos] = frame
 
     def save_images(self):
         if self.images is not None:
@@ -24,17 +47,20 @@ class Model:
             return
 
         flag, frame = self.cap.read()
-        frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-        self.images = np.zeros((frame.shape[0], frame.shape[1], self.num_frames))
-        self.images[:,:, 0] = frame
+        frame = cv2.cvtColor(frame, self.color_transform)
+        self.__add_image(frame, 0)
 
         success, frame = self.cap.read()
         counter = 1
-        while success and frame is not None and counter < self.num_frames:
-            frame = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            self.images[:,:, counter] = frame
-            counter += 1
-            flag, frame = self.cap.read()
+
+        print("Starting video processor to model background...")
+        with tqdm(total=self.num_frames) as pbar:
+            while success and frame is not None and counter < self.num_frames:
+                frame = cv2.cvtColor(frame, self.color_transform)
+                self.__add_image(frame, counter)
+                counter += 1
+                pbar.update(1)
+                flag, frame = self.cap.read()
 
     def model_background(self):
         if self.checkpoint is not None and self.load_checkpoint() == 1:
@@ -71,9 +97,11 @@ class Model:
 
 class GaussianModel(Model):
 
-    def __init__(self, video_path, num_frames, alpha, checkpoint=None):
-        super().__init__(video_path, num_frames, checkpoint)
-        print(f"[INIT] GaussianModel - alpha={alpha}")
+    def __init__(self, video_path, num_frames, alpha, checkpoint=None, colorspace="gray"):
+        super().__init__(video_path, num_frames, checkpoint, colorspace=colorspace)
+        # 2 modes
+        assert (colorspace != "gray" and len(alpha) == 3) or (colorspace == "gray" and len(alpha) == 1), f"Colorspace '{colorspace}' does not match number of alphas: {len(alpha)}"
+        print(f"[INIT] GaussianModel - alpha={alpha} - colorspace={colorspace}")
         self.alpha = alpha
         self.mean = None
         self.std = None
@@ -86,8 +114,9 @@ class GaussianModel(Model):
             The values computed here will be used afterwards to compute the foreground
         """
         self.mean = self.images.mean(axis=-1)
+        print("Mean computed successfully.")
         self.std = self.images.std(axis=-1)
-        #cv2.imwrite("mean.png", self.mean*255)
+        print("Standard deviation computed successfully.")
 
     def compute_next_foreground(self):
         """
@@ -102,7 +131,7 @@ class GaussianModel(Model):
         if not success:
             return None
 
-        I = cv2.cvtColor(I, cv2.COLOR_BGR2GRAY)
+        I = cv2.cvtColor(I, self.color_transform)
         return (abs(I - self.mean) >= self.alpha * (self.std + 2)).astype(np.uint8) * 255
 
     def save_checkpoint(self):
@@ -137,9 +166,11 @@ class GaussianModel(Model):
 
 class AdaptiveGaussianModel(Model):
 
-    def __init__(self, video_path, num_frames, alpha, p, checkpoint=None):
-        super().__init__(video_path, num_frames, checkpoint)
-        print(f"[INIT] AdaptiveGaussianModel - alpha={alpha}, p={p}")
+    def __init__(self, video_path, num_frames, alpha, p, checkpoint=None, colorspace="gray"):
+        super().__init__(video_path, num_frames, checkpoint, colorspace=colorspace)
+        # 2 modes
+        assert (colorspace != "gray" and len(alpha) == 3) or (colorspace == "gray" and len(alpha) == 1), f"Colorspace '{colorspace}' does not match number of alphas: {len(alpha)}"
+        print(f"[INIT] AdaptiveGaussianModel - alpha={alpha}, p={p} - colorspace={colorspace}")
         self.alpha = alpha
         self.p = p
         self.mean = None
@@ -152,9 +183,10 @@ class AdaptiveGaussianModel(Model):
             Function called after first X% of images are saved in self.images
             The values computed here will be used afterwards to compute the foreground
         """
-        self.mean = self.images.mean(axis=-1)
-        self.std = self.images.std(axis=-1)
-        #cv2.imwrite("mean.png", self.mean*255)
+        self.mean = self.images.mean(axis=-1)#, dtype=np.float64)
+        print("Mean computed successfully.")
+        self.std = self.images.std(axis=-1)#, dtype=np.float64)
+        print("Standard deviation computed successfully.")
 
     def compute_next_foreground(self):
         """
@@ -168,7 +200,7 @@ class AdaptiveGaussianModel(Model):
         success, I = self.cap.read()
         if not success:
             return None
-        I = cv2.cvtColor(I, cv2.COLOR_BGR2GRAY)
+        I = cv2.cvtColor(I, self.color_transform)
 
         # ADAPTIVE STEP HERE
         bm = (I - self.mean >= self.alpha * (self.std + 2)) # background mask
@@ -206,3 +238,4 @@ class AdaptiveGaussianModel(Model):
         self.std = np.load(std_path)
         print("Checkpoint loaded!")
         return 1
+
