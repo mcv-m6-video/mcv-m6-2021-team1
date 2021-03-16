@@ -7,7 +7,36 @@ from sklearn.metrics import average_precision_score
 from matplotlib import pyplot as plt
 
 
+
+def parse_aicity_rects(path):
+    """
+    Output format
+        dict[frame_num] = [[x1, y1, x2, y2]]
+    """
+    COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
+
+    ret_dict = {}
+    dtf = pd.read_csv(path, delimiter=',', names=COL_NAMES)
+
+    for i, row in dtf.iterrows():
+        frame_num = f'f_{int(row.frame) - 1}'
+
+        if frame_num not in ret_dict:
+            ret_dict[frame_num] = []
+        obj = {
+            'bbox': [row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height],
+            'conf': float(row.conf)
+        }
+        ret_dict[frame_num].append(obj)
+
+    return ret_dict
+
+
 def parse_xml_rects(path):
+    """
+    Output format
+        dict[frame_num] = [[x1, y1, x2, y2]]
+    """
     tree = ET.parse(path)
     root = tree.getroot()
     frame_dict = {}
@@ -15,9 +44,10 @@ def parse_xml_rects(path):
         if child.tag=='track' and child.attrib['label']=='car':
             for x in child:
                 d = x.attrib
-                if int(d['frame']) not in frame_dict:
-                    frame_dict[int(d['frame'])] = []
-                frame_dict[int(d['frame'])].append([float(d['xtl']), float(d['ytl']), 
+                frame = f"f_{d['frame']}"
+                if frame not in frame_dict:
+                    frame_dict[frame] = []
+                frame_dict[frame].append([float(d['xtl']), float(d['ytl']), 
                     float(d['xbr']), float(d['ybr'])])
     return frame_dict
 
@@ -86,95 +116,139 @@ def get_rect_iou(a, b):
     return interArea/(boxAArea+boxBArea-interArea)
 
 
-# def parse_aicity_rects(path):
-# Not sure why this function is twice
-#     ret_dict = {}
-#     dtf = pd.read_csv(path, delimiter=',', names=COL_NAMES)
-
-#     for i, row in dtf.iterrows():
-#         if row.frame not in ret_dict:
-#             ret_dict[row.frame] = []
-#         ret_dict[row.frame].append([row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height])
-
-#     return ret_dict
-
 def get_frame_iou(gt_rects, det_rects):
     list_iou = []
 
     for gt in gt_rects:
         max_iou = 0
-        for det in det_rects:
+        for obj in det_rects:
+            det = obj['bbox']
             iou = get_rect_iou(det, gt)
             if iou > max_iou:
                 max_iou = iou
-        list_iou.append(max_iou)
+        
+        if max_iou != 0:
+            list_iou.append(max_iou)
 
     return np.mean(list_iou)
 
 
-def get_AP(gt_rects, det_rects):
-
-    correct = np.zeros(len(det_rects))
-    conf = np.ones(len(det_rects)) # simulation of confidence levels
-
-    previous_detections = set()
-    for i, det in enumerate(det_rects):
-        for j, gt in enumerate(gt_rects):
-            iou = get_rect_iou(det, gt)
-
-            if iou > 0.5 and (j not in previous_detections):
-                correct[i] = 1
-                previous_detections.add(j)
-
-    # print('Scikit learn AP', average_precision_score(correct, conf, 'samples'))
-
-    acumulated_correct = np.array([np.sum(correct[:i]) for i in range(1, len(det_rects)+1)])
-
-    precision = acumulated_correct / (np.array(range(len(acumulated_correct)))+1)
-    recall = acumulated_correct / len(gt_rects)
-
-    # Values at infinity
-    precision = np.hstack([precision, 0]) # TODO: Should this be done or not? If not, very bigrcnn-high-pa
-    recall = np.hstack([recall, 1])
-
-    # Interpolate
-    interp_precision = []
-    sample_idx = np.linspace(0, 1, 11)
- 
-    sample_values = []
-    for i in sample_idx:
-        cont = -1
-        for v in recall:
-            cont+=1
-            if v > i: 
-                break
-        sample_values.append(precision[cont])
-    
-    # plt.plot(recall, precision, 'g')
-    # plt.scatter(sample_idx, sample_values)
-    # plt.show()
-
-    return np.mean(sample_values)
+def voc_ap(rec, prec):
+    """ ap = voc_ap(rec, prec)
+    Compute VOC AP given precision and recall.
+    using the  VOC 07 11 point method.
+    Based on https://github.com/rbgirshick/py-faster-rcnn/blob/master/lib/datasets/voc_eval.py
+    (and the link I got from teams 3 or 4)
+    """
+    # 11 point metric
+    ap = 0.
+    for t in np.arange(0., 1.1, 0.1):
+        if np.sum(rec >= t) == 0:
+            p = 0
+        else:
+            p = np.max(prec[rec >= t])
+        ap = ap + p / 11.
+    return ap
 
 
-def rectangle_mot_format(img, left, top, width, height, color, thickness=None, conf=1, id=1):
-    left = int(left)
-    top = int(top)
-    width = int(width)
-    height = int(height)
+def get_AP(gt_rects, det_rects, ovthresh=0.5):
+    """
+    gt_rects: ground truth rects in format dict[frame_num] = [[x1, y1, x2, y2]]
+    det_rects: detection rects in format dict[frame_num] = [[x1, y1, x2, y2]]
+    [ovthresh]: Overlap threshold (default = 0.5)
+    [use_07_metric]: Whether to use VOC07's 11 point AP computation
+        (default False)
+    """
+    # parse gt_rects a esto
+    # class_recs = {
+    #     'imagename': {
+    #         'bbox': [['x1', 'y1', 'x2', 'y2'], ['x1', 'y1', 'x2', 'y2']],
+    #         'difficult':[True, False],
+    #         'det': [False, False]
+    #     }
+    # }
 
-    return cv2.rectangle(img, (left, top), (left+width, top+height), color, thickness)
-  
+    class_recs = {}
+    npos = 0
+    for frame, bboxs in gt_rects.items():
+        class_recs[frame] = {
+            'bbox': bboxs,
+            'difficult': np.array([False]*len(bboxs)).astype(np.bool),
+            'det': [False]*len(bboxs)
+        }
+        npos += len(bboxs)
 
-def parse_aicity_rects(path):
-    COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
+    # image_ids = [0] # frame ids?
+    # confidence = np.array([1]) # confidence for each detection
+    # BB = np.array([['x1', 'y1', 'x2', 'y2']]) # for all detections
 
-    ret_dict = {}
-    dtf = pd.read_csv(path, delimiter=',', names=COL_NAMES)
+    image_ids = []
+    confidence = []
+    BB = []
 
-    for i, row in dtf.iterrows():
-        if row.frame not in ret_dict:
-            ret_dict[row.frame] = []
-        ret_dict[row.frame].append([row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height])
+    for frame, objs in det_rects.items():
+        for obj in objs:
+            image_ids.append(frame)
+            confidence.append(obj['conf']) # unkwnown
+            BB.append(obj['bbox'])
 
-    return ret_dict
+    confidence = np.array(confidence)
+    BB = np.array(BB)
+
+    # sort by confidence
+    sorted_ind = np.argsort(-confidence)
+    sorted_scores = np.sort(-confidence)
+    BB = BB[sorted_ind, :]
+    image_ids = [image_ids[x] for x in sorted_ind]
+
+    # go down dets and mark TPs and FPs
+    nd = len(image_ids)
+    tp = np.zeros(nd)
+    fp = np.zeros(nd)
+    for d in range(nd):
+        R = class_recs[image_ids[d]]
+        bb = BB[d, :].astype(float)
+        ovmax = -np.inf
+        BBGT = np.array(R['bbox']).astype(float)
+
+        if BBGT.size > 0:
+            # compute overlaps
+            # intersection
+            ixmin = np.maximum(BBGT[:, 0], bb[0])
+            iymin = np.maximum(BBGT[:, 1], bb[1])
+            ixmax = np.minimum(BBGT[:, 2], bb[2])
+            iymax = np.minimum(BBGT[:, 3], bb[3])
+            iw = np.maximum(ixmax - ixmin + 1., 0.)
+            ih = np.maximum(iymax - iymin + 1., 0.)
+            inters = iw * ih
+
+            # union
+            uni = ((bb[2] - bb[0] + 1.) * (bb[3] - bb[1] + 1.) +
+                   (BBGT[:, 2] - BBGT[:, 0] + 1.) *
+                   (BBGT[:, 3] - BBGT[:, 1] + 1.) - inters)
+
+            overlaps = inters / uni
+            ovmax = np.max(overlaps)
+            jmax = np.argmax(overlaps)
+
+        if ovmax > ovthresh:
+            if not R['difficult'][jmax]:
+                if not R['det'][jmax]:
+                    tp[d] = 1.
+                    R['det'][jmax] = 1
+                else:
+                    fp[d] = 1.
+        else:
+            fp[d] = 1.
+
+    # compute precision recall
+    fp = np.cumsum(fp)
+    tp = np.cumsum(tp)
+    rec = tp / float(npos)
+    # avoid divide by zero in case the first detection matches a difficult
+    # ground truth
+    prec = tp / np.maximum(tp + fp, np.finfo(np.float64).eps)
+    ap = voc_ap(rec, prec)
+
+    # return rec, prec, ap
+    return ap
