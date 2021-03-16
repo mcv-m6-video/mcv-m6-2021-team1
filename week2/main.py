@@ -126,16 +126,17 @@ def main(args):
         model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, \
                                 checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
         MODEL_NAME = "GaussianModel"
+        results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.alpha}_{args.percentage}"
     elif args.model == "agm":
         model = AdaptiveGaussianModel(VIDEO_PATH, model_frames, args.alpha, args.p, \
                                 checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
         MODEL_NAME = "AdaptiveGaussianModel"
+        results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.alpha}_{args.p}_{args.percentage}"
     else:
         raise Exception
 
     model.model_background()
 
-    results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.alpha}_{args.percentage}"
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     writer = imageio.get_writer(f"{results_path}/video.mp4", fps=25)
@@ -181,7 +182,7 @@ def main(args):
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
 parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm"], help="model used for background modeling")
-parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv"], help="colorspace used for background modeling")
+parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"], help="colorspace used for background modeling")
 parser.add_argument('-M', '--max', type=int, default=-1, help="max of frames for which infer foreground")
 parser.add_argument('-perc', '--percentage', type=float, default=0.25, help="percentage of video to use for background modeling")
 parser.add_argument('-a', '--alpha', metavar='N', nargs='+', type=float, default=11, help="alpha value")

@@ -27,6 +27,10 @@ class Model:
             self.color_transform = cv2.COLOR_BGR2HSV
         elif colorspace == "rgb":
             self.color_transform = cv2.COLOR_BGR2RGB
+        elif colorspace == "lab":
+            self.color_transform = cv2.COLOR_BGR2Lab
+        elif colorspace == "ycrcb":
+            self.color_transform = cv2.COLOR_BGR2YCrCb
         else:
             raise Exception
 
@@ -203,13 +207,13 @@ class AdaptiveGaussianModel(Model):
         I = cv2.cvtColor(I, self.color_transform)
 
         # ADAPTIVE STEP HERE
-        bm = (I - self.mean >= self.alpha * (self.std + 2)) # background mask
+        bm = (abs(I - self.mean) < self.alpha * (self.std + 2)) # background mask
 
         self.mean[bm] = (self.p * I[bm] + (1 - self.p) * self.mean[bm])
-        aux = (I - self.mean)
+        aux = (I - self.mean) # no need of abs because it is squared
         self.std[bm] = np.sqrt(self.p * aux[bm] * aux[bm] + (1 - self.p) * (self.std[bm] * self.std[bm]))
 
-        return (I - self.mean >= self.alpha * (self.std + 2)).astype(np.uint8) * 255, I
+        return (abs(I - self.mean) >= self.alpha * (self.std + 2)).astype(np.uint8) * 255, I
 
     def save_checkpoint(self):
         """
