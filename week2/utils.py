@@ -1,8 +1,8 @@
+import cv2
 import random
 import pandas as pd
 import numpy as np
 import xml.etree.ElementTree as ET
-
 from sklearn.metrics import average_precision_score
 from matplotlib import pyplot as plt
 
@@ -200,6 +200,26 @@ def get_frame_iou(gt_rects, det_rects):
             list_iou.append(max_iou)
 
     return np.mean(list_iou)
+
+
+def imshow_rects(im, rect_list, name):
+    im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
+    for det in rect_list:
+        rects = det['rects']
+        color = det['color']
+
+        for obj in rects:
+            r = obj['bbox']
+            im = cv2.rectangle(im, (int(r[0]), int(r[1])), (int(r[2]), int(r[3])), color, 3)    
+    display_resized(name, im)
+
+
+def display_resized(name, im, sf=0.5):
+    im = cv2.resize(im, tuple(np.int0(sf*np.array(im.shape[:2][::-1]))))
+    cv2.imshow(name, im)
+    k = cv2.waitKey(5)
+    if k == ord('q'):
+        quit()
 
 
 def voc_ap(rec, prec):
