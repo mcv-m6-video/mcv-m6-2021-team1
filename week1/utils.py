@@ -10,6 +10,8 @@ from matplotlib import pyplot as plt
 
 def parse_aicity_rects(path):
     """
+    Input:
+        - Path to annotation xml in AI City format
     Output format
         dict[frame_num] = [[x1, y1, x2, y2]]
     """
@@ -34,7 +36,9 @@ def parse_aicity_rects(path):
 
 def parse_xml_rects(path):
     """
-    Output format
+    Input:
+        - Path to annotation xml in Pascal VOC format
+    Output format:
         dict[frame_num] = [[x1, y1, x2, y2]]
     """
     tree = ET.parse(path)
@@ -53,6 +57,9 @@ def parse_xml_rects(path):
 
 
 def get_vertex_from_cwh(center, width, height):
+    """
+    Takes a 2d center, widht and height and return vertex in convenient format 
+    """
     xtl = center[0] - width//2
     xbr = center[0] + width//2
     ytl = center[1] - height//2
@@ -62,7 +69,14 @@ def get_vertex_from_cwh(center, width, height):
 
 
 def generate_noisy_bboxes(frame_dict, tol_dropout, std_pos, std_size, std_ar):
-
+    """
+    Input:
+        - frame dict: gt_boxes
+        - tol_droput: probability of removing boxes
+        - std_pos: standartd deviation of gaussain controlling center position
+        - std_size: standartd deviation of gaussain controlling area
+        - std_ar: standartd deviation of gaussain controlling aspectr ratio
+    """
     noisy_dct = {}
 
     for frame, bbs in frame_dict.items():
@@ -88,15 +102,16 @@ def generate_noisy_bboxes(frame_dict, tol_dropout, std_pos, std_size, std_ar):
                 h *= np.random.normal(1, std_ar)
                 w *= np.random.normal(1, std_ar)
 
-
-                if frame not in noisy_dct:
-                    noisy_dct[frame] = []
-                noisy_dct[frame].append(get_vertex_from_cwh(center, w, h))
+                key = f'f_frame'
+                if key not in noisy_dct:
+                    noisy_dct[key] = {'bbox': [], 'conf':1.}
+                noisy_dct[key]['bbox'].append(get_vertex_from_cwh(center, w, h))
 
     return noisy_dct
 
 
 def get_rect_iou(a, b):
+    """Return iou for a single a pair of boxes"""
     x11, y11, x12, y12 = a
     x21, y21, x22, y22 = b
 
@@ -117,6 +132,7 @@ def get_rect_iou(a, b):
 
 
 def get_frame_iou(gt_rects, det_rects):
+    """Return iou for a frame"""
     list_iou = []
 
     for gt in gt_rects:
