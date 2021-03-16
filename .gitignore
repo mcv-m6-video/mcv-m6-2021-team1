@@ -12,4 +12,6 @@ __pycache__/
 */checkpoints/
 */__pycache__/
 
+*dev/
+
 */runs/
