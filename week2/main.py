@@ -13,7 +13,7 @@ TOTAL_FRAMES = 2141
 #ALPHA = 11
 #P = 0.001
 
-VIDEO_PATH = "../../AICity_data/train/S03/c010/vdo.avi"
+VIDEO_PATH = "../../Data/AICity_data/train/S03/c010/vdo.avi"
 
 def post_processing(foreground):
     return foreground
