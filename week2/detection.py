@@ -96,8 +96,6 @@ def analyse_contours_gm(im, display):
 
 
 def morph_agm(im):
-    im = cv2.morphologyEx(im, cv2.MORPH_OPEN,
-        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
     im = cv2.morphologyEx(im, cv2.MORPH_CLOSE,
         cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
     return im
@@ -136,7 +134,8 @@ def analyse_contours_agm(im, display):
 
         # Filter
         # I'm just testing out values on the extracted features
-        if area_pct < 0.25 or area_pct > 20 or ar > 1.2 or ar < 0.3: 
+        # if area_pct < 0.25 or area_pct > 20 or ar > 1.2 or ar < 0.3: 
+        if w < 10 or h < 10 or ar > 1.5 or ar < 0.5 or area_pct < 0.1: 
             # Bad detection
             im = cv2.rectangle(im_c, (x, y), (x+w, y+h), (0, 0, 255), 3)
         else:
