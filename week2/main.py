@@ -43,6 +43,7 @@ def main(args):
     elif args.model == "sota":
         model = Sota(VIDEO_PATH, model_frames, args.method)
         MODEL_NAME = "SOTA" + args.method
+        args.model=args.method
         results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.method}"
     else:
         raise Exception
@@ -58,16 +59,15 @@ def main(args):
     gt_rects = {k:v for k,v in gt_rects.items() if int(k.split('_')[-1]) >= int(TOTAL_FRAMES*args.percentage)} # remove "training" frames
 
     foreground, I = model.compute_next_foreground()
-    foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
+    foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
     det_rects[f'f_{counter}'] = recs
     writer.append_data(foreground)
-    # counter = int(TOTAL_FRAMES*args.percentage)
+    
+    counter = int(TOTAL_FRAMES*args.percentage)
+    det_rects = {}
+    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True)
+    gt_rects = {k:v for k,v in gt_rects.items() if int(k.split('_')[-1]) >= int(TOTAL_FRAMES*args.percentage)} # remove "training" frames
 
-
-    # det_rects = utils.parse_aicity_rects(AI_GT_RECTS_PATH)
-    # mAP = utils.get_AP(gt_rects, det_rects)
-    # print(mAP)
-    # exit()
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
     while foreground is not None:
@@ -83,7 +83,7 @@ def main(args):
         ret = model.compute_next_foreground()
         if ret:
             foreground, I = ret
-            foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
+            foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
             det_rects[f'f_{counter}'] = recs
         else:
             foreground = None
@@ -99,6 +99,7 @@ def main(args):
     print(f"Saved to '{results_path}'")
 
     # Remove first frames
+    # det_rects = utils.parse_aicity_rects("../../data/AICity_data/train/S03/c010/gt/gt.txt")
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
 

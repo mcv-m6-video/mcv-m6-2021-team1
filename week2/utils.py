@@ -203,7 +203,7 @@ def get_frame_iou(gt_rects, det_rects):
 
 
 def imshow_rects(im, rect_list, name):
-    im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
+    #im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
     for det in rect_list:
         rects = det['rects']
         color = det['color']
