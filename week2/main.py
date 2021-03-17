@@ -55,7 +55,7 @@ def main(args):
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
     while foreground is not None:
-        foreground, recs = detection.post_processing(foreground, display=args.display)
+        foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
 
         det_rects[f'f_{counter}'] = recs
 
