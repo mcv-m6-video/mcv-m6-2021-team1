@@ -250,17 +250,17 @@ class Sota(Model):
         if method == "mog":
             self.method = cv2.bgsegm.createBackgroundSubtractorMOG(history=110, nmixtures=2)
         elif method == "mog2":
-            self.method = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=15)
+            self.method = cv2.createBackgroundSubtractorMOG2(history=150, varThreshold=10)
         elif method == "lsbp":
-            self.method = cv2.bgsegm.createBackgroundSubtractorLSBP() 
+            self.method = cv2.bgsegm.createBackgroundSubtractorLSBP()
         elif method == "gmg":
-            self.method = cv2.bgsegm.createBackgroundSubtractorGMG()
+            self.method = cv2.bgsegm.createBackgroundSubtractorGMG(initializationFrames=300)
         elif method == "cnt":
-            self.method = cv2.bgsegm.createBackgroundSubtractorCNT()
+            self.method = cv2.bgsegm.createBackgroundSubtractorCNT(minPixelStability=0, maxPixelStability=60)
         elif method == "gsoc":
             self.method = cv2.bgsegm.createBackgroundSubtractorGSOC()
         elif method == "knn":
-            self.method = cv2.createBackgroundSubtractorKNN()
+            self.method = cv2.createBackgroundSubtractorKNN(history=100, dist2Threshold=550)
         else:
             raise Exception
 

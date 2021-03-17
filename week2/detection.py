@@ -35,7 +35,7 @@ def NMS(rects):
     return [r for i, r in enumerate(rects) if i in idx]
 
 def apply_morph(im, method):
-    if method == 'gm' or method == 'knn' or method=='lsbp' or method=='cnt':
+    if method == 'gm' or method == 'knn' or method=='lsbp' or method=='cnt' or method=='gsoc':
          # Filter out noise    
         im = cv2.morphologyEx(im, cv2.MORPH_ERODE,
             cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))

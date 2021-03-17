@@ -6,7 +6,7 @@ import matplotlib.pyplot as plt
 import imageio
 import argparse
 from models import GaussianModel, AdaptiveGaussianModel, Sota
-
+import time
 import utils
 import detection
 
@@ -23,6 +23,8 @@ GT_RECTS_PATH = "../../Data/ai_challenge_s03_c010-full_annotation.xml"
 AI_GT_RECTS_PATH = "../../Data/AICity_data/train/S03/c010/gt/gt.txt"
 
 def main(args):
+
+    start = time.time()
 
     if not os.path.exists(VIDEO_PATH):
         print("Video does not exist.")
@@ -117,6 +119,9 @@ def main(args):
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
 
+    end = time.time()
+
+    print('Time:', end-start)
  
     imageio.mimsave(f'{results_path}/before.gif', imgs_gif_bf[:200])
     imgs_gif_af = [cv2.cvtColor(f_gif, cv2.COLOR_BGR2RGB) for f_gif in imgs_gif_af]
