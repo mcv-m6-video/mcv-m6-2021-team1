@@ -19,6 +19,7 @@ TOTAL_FRAMES = 2141
 # VIDEO_PATH = "../../AICity_data/train/S03/c010/vdo.avi"
 VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
 GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
+AI_GT_RECTS_PATH = "../../data/AICity_data/train/S03/c010/gt/gt.txt"
 
 def main(args):
 
@@ -41,23 +42,30 @@ def main(args):
     else:
         raise Exception
 
-    model.model_background()
+    counter = model.model_background()
 
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     writer = imageio.get_writer(f"{results_path}/video.mp4", fps=25)
 
-    foreground, I = model.compute_next_foreground()
-    writer.append_data(foreground)
-    counter = int(TOTAL_FRAMES*args.percentage)
     det_rects = {}
-    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True) 
+    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True)
+    gt_rects = {k:v for k,v in gt_rects.items() if int(k.split('_')[-1]) >= int(TOTAL_FRAMES*args.percentage)} # remove "training" frames
+
+    foreground, I = model.compute_next_foreground()
+    foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
+    det_rects[f'f_{counter}'] = recs
+    writer.append_data(foreground)
+    # counter = int(TOTAL_FRAMES*args.percentage)
+
+
+    # det_rects = utils.parse_aicity_rects(AI_GT_RECTS_PATH)
+    # mAP = utils.get_AP(gt_rects, det_rects)
+    # print(mAP)
+    # exit()
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
     while foreground is not None:
-        foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
-
-        det_rects[f'f_{counter}'] = recs
 
         if args.display:
             utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
@@ -70,6 +78,8 @@ def main(args):
         ret = model.compute_next_foreground()
         if ret:
             foreground, I = ret
+            foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
+            det_rects[f'f_{counter}'] = recs
         else:
             foreground = None
 
@@ -83,6 +93,7 @@ def main(args):
     writer.close()
     print(f"Saved to '{results_path}'")
 
+    # Remove first frames
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
 
