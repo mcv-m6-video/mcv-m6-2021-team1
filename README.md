@@ -23,7 +23,8 @@ The models available include
 
 ````
 $ python week2/main.py -h
-usage: main.py [-h] [-m {gm,agm,sota}] [-c {gray,rgb,hsv,lab,ycrcb}] [-M MAX] [-perc PERCENTAGE] [-a N [N ...]] [-p P] [-d] [-meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}]
+usage: main.py [-h] [-m {gm,agm,sota}] [-c {gray,rgb,hsv,lab,ycrcb}] [-M MAX] [-perc PERCENTAGE] 
+               [-a N [N ...]] [-p P] [-d] [-meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}]
 
 Extract foreground from video.
 
@@ -32,16 +33,19 @@ optional arguments:
   -m {gm,agm,sota}, --model {gm,agm,sota}
                         The model used for background modeling. Default value is 'gm':Gaussian.
   -c {gray,rgb,hsv,lab,ycrcb}, --colorspace {gray,rgb,hsv,lab,ycrcb}
-                        choose the colorspace used for background modeling. Default value is 'gray
+                        choose the colorspace used for background modeling. 
+                        Default value is 'gray.
   -M MAX, --max MAX     max number of frames for which to extract foreground. Set to '-1' by default.
   -perc PERCENTAGE, --percentage PERCENTAGE
                         percentage of video to use for background modeling
   -a N [N ...], --alpha N [N ...]
                         alpha value or values depending on color space used for modelling
-  -p P, --p P           Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion of new information to model
+  -p P, --p P           Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion 
+                        of new information to model
   -d, --display         to display frames as they are processed
   -meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}, --method {mog,mog2,lsbp,gmg,cnt,gsoc,knn}
-                        SOTA algorithm used for background subtraction. The '--model' parameter has to be set to 'sota' to be able to use this.
+                        SOTA algorithm used for background subtraction. 
+                        The '--model' parameter has to be set to 'sota' to be able to use this.
 ````
 
 ## Random/Grid search
