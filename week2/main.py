@@ -89,14 +89,14 @@ def main(args):
             foreground, I = ret
 
             if counter % 2 == 0:
-                imgs_gif_bf.append(foreground) #for gif generation
+                imgs_gif_bf.append(cv2.resize(foreground, (256, 256 * foreground.shape[0] // foreground.shape[1]))) #for gif generation
 
             foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
 
             if counter % 2 == 0:
                 img_gif = utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
                     {'rects': gt_rects_detformat.get(f'f_{counter}', []), 'color': (0,255,0)}], 'result', disp=False)
-                imgs_gif_af.append(img_gif)
+                imgs_gif_af.append(cv2.resize(img_gif, (256, 256 * img_gif.shape[0] // img_gif.shape[1])))
 
             det_rects[f'f_{counter}'] = recs
         else:
@@ -117,6 +117,7 @@ def main(args):
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
 
+ 
     imageio.mimsave(f'{results_path}/before.gif', imgs_gif_bf[:200])
     imgs_gif_af = [cv2.cvtColor(f_gif, cv2.COLOR_BGR2RGB) for f_gif in imgs_gif_af]
     imageio.mimsave(f'{results_path}/after.gif', imgs_gif_af[:200])

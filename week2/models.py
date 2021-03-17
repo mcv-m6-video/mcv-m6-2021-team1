@@ -248,7 +248,7 @@ class Sota(Model):
         super().__init__(video_path, num_frames, checkpoint, colorspace=colorspace)
 
         if method == "mog":
-            self.method = cv2.bgsegm.createBackgroundSubtractorMOG(history=110, nmixtures=7)
+            self.method = cv2.bgsegm.createBackgroundSubtractorMOG(history=110, nmixtures=2)
         elif method == "mog2":
             self.method = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=15)
         elif method == "lsbp":
