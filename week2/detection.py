@@ -96,8 +96,10 @@ def analyse_contours_gm(im, display):
 
 
 def morph_agm(im):
-    im = cv2.morphologyEx(im, cv2.MORPH_CLOSE,
+    im = cv2.morphologyEx(im, cv2.MORPH_DILATE,
         cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+    # im = cv2.morphologyEx(im, cv2.MORPH_CLOSE,
+    #     cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 9)))
     return im
 
 
