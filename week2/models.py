@@ -243,3 +243,42 @@ class AdaptiveGaussianModel(Model):
         print("Checkpoint loaded!")
         return 1
 
+class Sota(Model):
+    def __init__(self, video_path, num_frames, method, checkpoint=None, colorspace="gray"):
+        super().__init__(video_path, num_frames, checkpoint, colorspace=colorspace)
+
+        if method == "mog":
+            self.method = cv2.bgsegm.createBackgroundSubtractorMOG(history=110, nmixtures=7)
+        elif method == "mog2":
+            self.method = cv2.createBackgroundSubtractorMOG2()
+        elif method == "lsbp":
+            self.method = cv2.bgsegm.createBackgroundSubtractorLSBP() 
+        elif method == "gmg":
+            self.method = cv2.bgsegm.createBackgroundSubtractorGMG()
+        elif method == "cnt":
+            self.method = cv2.bgsegm.createBackgroundSubtractorCNT()
+        elif method == "gsoc":
+            self.method = cv2.bgsegm.createBackgroundSubtractorGSOC()
+        elif method == "knn":
+            self.method = cv2.createBackgroundSubtractorKNN()
+        else:
+            raise Exception
+
+    def compute_next_foreground(self):
+        """
+            Function to compute the foreground. 
+        """
+        success, frame = self.cap.read()
+        if not success:
+            return None
+        fgmask = self.method.apply(frame)
+        return fgmask, frame
+
+    def model_background(self):
+        frame = self.cap.read()
+        counter = 1
+        while frame is not None and counter < self.num_frames:
+            frame = self.cap.read()
+            counter += 1
+        print("Background modeled!")
+        return

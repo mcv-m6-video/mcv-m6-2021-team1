@@ -5,7 +5,7 @@ import os
 import matplotlib.pyplot as plt
 import imageio
 import argparse
-from models import GaussianModel, AdaptiveGaussianModel
+from models import GaussianModel, AdaptiveGaussianModel, Sota
 
 import utils
 import detection
@@ -16,9 +16,10 @@ TOTAL_FRAMES = 2141
 #ALPHA = 11
 #P = 0.001
 
+VIDEO_PATH = "../../Data/AICity_data/train/S03/c010/vdo.avi"
 # VIDEO_PATH = "../../AICity_data/train/S03/c010/vdo.avi"
-VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
-GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
+# VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
+GT_RECTS_PATH = "../../Data/ai_challenge_s03_c010-full_annotation.xml"
 
 def main(args):
 
@@ -38,6 +39,10 @@ def main(args):
                                 checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
         MODEL_NAME = "AdaptiveGaussianModel"
         results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.alpha}_{args.p}_{args.percentage}"
+    elif args.model == "sota":
+        model = Sota(VIDEO_PATH, model_frames, args.method)
+        MODEL_NAME = "SOTA" + args.method
+        
     else:
         raise Exception
 
@@ -55,7 +60,7 @@ def main(args):
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
     while foreground is not None:
-        foreground, recs = detection.post_processing(foreground)
+        foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
 
         det_rects[f'f_{counter}'] = recs
 
@@ -75,6 +80,7 @@ def main(args):
 
         if counter % 100 == 0:
             print(f"{counter} frames processed...")
+            print(foreground is None)
 
         if args.max != -1 and counter >= args.max:
             break
@@ -87,13 +93,14 @@ def main(args):
     print('mAP:', mAP)
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
-parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm"], help="model used for background modeling")
+parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"], help="model used for background modeling")
 parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"], help="colorspace used for background modeling")
 parser.add_argument('-M', '--max', type=int, default=-1, help="max of frames for which infer foreground")
 parser.add_argument('-perc', '--percentage', type=float, default=0.25, help="percentage of video to use for background modeling")
 parser.add_argument('-a', '--alpha', metavar='N', nargs='+', type=float, default=11, help="alpha value")
 parser.add_argument('-p', '--p', type=float, default=0.001, help="[AdaptiveGaussianModel] parameter controlling the inclusion of new information to model")
 parser.add_argument('-d', '--display', action='store_true', help="Display frames as they are processed or not")
+parser.add_argument('-meth', '--method', type=str, default='mog', choices=["mog", "mog2", "lsbp", "gmg", "cnt", "gsoc", "knn"], help="sota algorithm used to substract bg")
 args = parser.parse_args()
 
 main(args)
