@@ -30,6 +30,9 @@ def main(args):
 
     model_frames = int(args.percentage * TOTAL_FRAMES)
 
+    imgs_gif_bf = [] #gif generation
+    imgs_gif_af = []
+    
     if args.model == "gm":
         model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, \
                                 checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
@@ -76,6 +79,7 @@ def main(args):
             utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
                 {'rects': gt_rects_detformat.get(f'f_{counter}', []), 'color': (0,255,0)}], 'result')
 
+
         #cv2.imwrite(f"results/{args.alpha}_{args.percentage}/fg_{counter}.png", foreground)
         writer.append_data(foreground)
         counter += 1
@@ -83,7 +87,17 @@ def main(args):
         ret = model.compute_next_foreground()
         if ret:
             foreground, I = ret
+
+            if counter % 2 == 0:
+                imgs_gif_bf.append(foreground) #for gif generation
+
             foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
+
+            if counter % 2 == 0:
+                img_gif = utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
+                    {'rects': gt_rects_detformat.get(f'f_{counter}', []), 'color': (0,255,0)}], 'result', disp=False)
+                imgs_gif_af.append(img_gif)
+
             det_rects[f'f_{counter}'] = recs
         else:
             foreground = None
@@ -102,6 +116,11 @@ def main(args):
     # det_rects = utils.parse_aicity_rects("../../data/AICity_data/train/S03/c010/gt/gt.txt")
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
+
+    imageio.mimsave(f'{results_path}/before.gif', imgs_gif_bf[:200])
+    imgs_gif_af = [cv2.cvtColor(f_gif, cv2.COLOR_BGR2RGB) for f_gif in imgs_gif_af]
+    imageio.mimsave(f'{results_path}/after.gif', imgs_gif_af[:200])
+
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
 parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"], help="model used for background modeling")

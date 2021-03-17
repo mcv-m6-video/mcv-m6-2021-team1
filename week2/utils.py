@@ -1,5 +1,7 @@
 import cv2
 import random
+import os
+import imageio
 import pandas as pd
 import numpy as np
 import xml.etree.ElementTree as ET
@@ -202,7 +204,7 @@ def get_frame_iou(gt_rects, det_rects):
     return np.mean(list_iou)
 
 
-def imshow_rects(im, rect_list, name):
+def imshow_rects(im, rect_list, name, disp=True):
     #im = cv2.cvtColor(im, cv2.COLOR_GRAY2BGR)
     for det in rect_list:
         rects = det['rects']
@@ -210,8 +212,10 @@ def imshow_rects(im, rect_list, name):
 
         for obj in rects:
             r = obj['bbox']
-            im = cv2.rectangle(im, (int(r[0]), int(r[1])), (int(r[2]), int(r[3])), color, 3)    
-    display_resized(name, im)
+            im = cv2.rectangle(im, (int(r[0]), int(r[1])), (int(r[2]), int(r[3])), color, 3)  
+    if disp:  
+        display_resized(name, im)
+    return im
 
 
 def display_resized(name, im, sf=0.5):
@@ -341,3 +345,4 @@ def get_AP(gt_rects, det_rects, ovthresh=0.5):
 
     # return rec, prec, ap
     return ap
+

@@ -11,10 +11,12 @@ def post_processing(foreground, method, display=False):
     if display:
         utils.display_resized('before', foreground)
 
+
     foreground = foreground * roi.astype(np.uint8)
     foreground = apply_morph(foreground, method)
     
     out_im, recs = analyse_contours_agm(foreground, display)
+
 
     # NMS
     recs = NMS(recs)
@@ -33,7 +35,7 @@ def NMS(rects):
     return [r for i, r in enumerate(rects) if i in idx]
 
 def apply_morph(im, method):
-    if method == 'gm' or method == 'knn':
+    if method == 'gm' or method == 'knn' or method=='lsbp' or method=='cnt':
          # Filter out noise    
         im = cv2.morphologyEx(im, cv2.MORPH_ERODE,
             cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))
@@ -47,7 +49,11 @@ def apply_morph(im, method):
         im = cv2.morphologyEx(im, cv2.MORPH_DILATE,
             cv2.getStructuringElement(cv2.MORPH_RECT, (1, 3)))
 
-    elif method == 'mog':
+    elif method == 'gmg':
+        kernel = cv2.getStructuringElement(cv2.MORPH_ELLIPSE,(3,3))
+        im = cv2.morphologyEx(im, cv2.MORPH_OPEN, kernel)
+
+    elif method == 'mog' or method=='mog2':
          # Filter out noise    
         im = cv2.morphologyEx(im, cv2.MORPH_ERODE,
             cv2.getStructuringElement(cv2.MORPH_RECT, (5, 5)))
