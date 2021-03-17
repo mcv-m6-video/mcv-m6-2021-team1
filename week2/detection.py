@@ -3,14 +3,13 @@ import numpy as np
 
 import utils
 
-ROI_PATH = "../../data/AICity_data/train/S03/c010/roi.jpg"
+ROI_PATH = "../../Data/AICity_data/train/S03/c010/roi.jpg"
 
 def post_processing(foreground, method, display=False):
     roi = cv2.imread(ROI_PATH, 0)/255
 
     if display:
         utils.display_resized('before', foreground)
-
 
     foreground = foreground * roi.astype(np.uint8)
     foreground = apply_morph(foreground, method)
