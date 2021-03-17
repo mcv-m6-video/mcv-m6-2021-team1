@@ -96,12 +96,14 @@ def analyse_contours_gm(im, display):
 
 
 def morph_agm(im):
-    im = cv2.morphologyEx(im, cv2.MORPH_OPEN,
-        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (3, 3)))
     im = cv2.morphologyEx(im, cv2.MORPH_CLOSE,
         cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (9, 9)))
+    im = cv2.morphologyEx(im, cv2.MORPH_DILATE,
+        cv2.getStructuringElement(cv2.MORPH_ELLIPSE, (1, 9)))
     return im
 
+track_static = [{'bbox':[0, 0, 0, 0], 'weight':0}]
+track_moving = [{'bbox':[0, 0, 0, 0], 'weight':0}]
 
 def analyse_contours_agm(im, display):
 
@@ -136,11 +138,46 @@ def analyse_contours_agm(im, display):
 
         # Filter
         # I'm just testing out values on the extracted features
-        if area_pct < 0.25 or area_pct > 20 or ar > 1.2 or ar < 0.3: 
+        # if area_pct < 0.25 or area_pct > 20 or ar > 1.2 or ar < 0.3: 
+        if w < 10 or h < 10 or ar > 1.5 or ar < 0.5 or area_pct < 0.1 or para > 0.5: 
             # Bad detection
             im = cv2.rectangle(im_c, (x, y), (x+w, y+h), (0, 0, 255), 3)
         else:
             # Good detection
+            # static_found = False
+            # move_found = False
+
+            # static_weight = 0
+            # move_weight = 0
+            # for j in range(len(track_static)):
+            #     static_iou = utils.get_rect_iou(track_static[j]['bbox'], [x, y, x+w, y+h])
+
+            #     if  static_iou >= 0.7:
+            #         track_static[j]['weight'] += 1
+            #         static_weight = track_static[j]['weight']
+            #         static_found = True
+            #         break
+            
+            # for j in range(len(track_moving)):
+            #     move_iou = utils.get_rect_iou(track_moving[j]['bbox'], [x, y, x+w, y+h])
+                
+            #     if  move_iou >= 0.25:
+            #         track_moving[j]['weight'] += 1
+            #         track_moving[j]['bbox'] = [x, y, x+w, y+h]
+            #         move_weight = track_moving[j]['weight']
+            #         move_found = True
+            #         break
+
+            # if not static_found:
+            #     track_static.append({'bbox': [x, y, x+w, y+h], 'weight': 1})
+            
+            # if not move_found:
+            #     track_moving.append({'bbox': [x, y, x+w, y+h], 'weight': 1})
+
+            # if static_weight > 3 or move_weight < 2:
+            #     # Static or too new
+            #     im = cv2.rectangle(im_c, (x, y), (x+w, y+h), (0, 255, 0), 3)
+
             det_recs.append({'bbox': [x, y, x+w, y+h], 'conf': 1})
 
             out_im = cv2.drawContours(out_im, contours, i, (255,255,255), -1)

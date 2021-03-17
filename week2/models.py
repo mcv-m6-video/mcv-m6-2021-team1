@@ -75,7 +75,7 @@ class Model:
                 frame = self.cap.read()
                 counter += 1
             print("Background modeled!")
-            return
+            return counter
 
         # we add all images to the array
         self.save_images()
@@ -281,4 +281,4 @@ class Sota(Model):
             frame = self.cap.read()
             counter += 1
         print("Background modeled!")
-        return
+        return counter
