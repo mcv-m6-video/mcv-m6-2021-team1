@@ -35,7 +35,8 @@ optional arguments:
   -c {gray,rgb,hsv,lab,ycrcb}, --colorspace {gray,rgb,hsv,lab,ycrcb}
                         choose the colorspace used for background modeling. 
                         Default value is 'gray.
-  -M MAX, --max MAX     max number of frames for which to extract foreground. Set to '-1' by default.
+  -M MAX, --max MAX     max number of frames for which to extract foreground. 
+                        Set to '-1' by default, which means take all the frames available.
   -perc PERCENTAGE, --percentage PERCENTAGE
                         percentage of video to use for background modeling
   -a N [N ...], --alpha N [N ...]
