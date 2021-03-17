@@ -15,9 +15,11 @@
 All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
 
 ## Sript Usage
-GaussianModel -> gm
-AdaptiveGM -> agm
-SOTA -> sota, and select which one with "--method"
+
+The models available include
+- GaussianModel -> 'gm'
+- AdaptiveGM -> 'agm'
+- SOTA -> 'sota', and select which one to use with "--method" argument to the parser
 
 ````
 $ python week2/main.py -h
