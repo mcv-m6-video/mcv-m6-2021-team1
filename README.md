@@ -14,7 +14,7 @@
 ## Runner
 All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
 
-### Model selection 
+#### Model selection 
 GaussianModel -> gm
 AdaptiveGM -> agm
 SOTA -> sota, and select which one with "--method" 
@@ -22,25 +22,29 @@ SOTA -> sota, and select which one with "--method"
 '-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"]
 ```
 
-### Method selection (only if model==sota)
+#### Method selection (only if model==sota)
 ```
 '-meth', '--method', type=str, default='mog', choices=["mog", "mog2", "lsbp", "gmg", "cnt", "gsoc", "knn"]
 ```
 
-### Colorspace
+#### Colorspace
 ```
 '-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"]
 ```
 
-### Alpha
+#### Alpha
 ```
 '-a', '--alpha', metavar='N', nargs='+', type=float, default=11
 ```
 
-### Rho (p)
+#### Rho (p)
 ```
 '-p', '--p', type=float, default=0.001
 ```
+
+## Random/Grid search
+There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
+
 
 
 # Week1
