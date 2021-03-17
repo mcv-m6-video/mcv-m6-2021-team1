@@ -42,7 +42,7 @@ def main(args):
     elif args.model == "sota":
         model = Sota(VIDEO_PATH, model_frames, args.method)
         MODEL_NAME = "SOTA" + args.method
-        
+        results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.method}"
     else:
         raise Exception
 
