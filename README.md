@@ -14,37 +14,36 @@
 ## Runner
 All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
 
-#### Model selection 
+## Sript Usage
 GaussianModel -> gm
 AdaptiveGM -> agm
-SOTA -> sota, and select which one with "--method" 
-```
-'-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"]
-```
+SOTA -> sota, and select which one with "--method"
 
-#### Method selection (only if model==sota)
-```
-'-meth', '--method', type=str, default='mog', choices=["mog", "mog2", "lsbp", "gmg", "cnt", "gsoc", "knn"]
-```
+````
+$ python week2/main.py -h
+usage: main.py [-h] [-m {gm,agm,sota}] [-c {gray,rgb,hsv,lab,ycrcb}] [-M MAX] [-perc PERCENTAGE] [-a N [N ...]] [-p P] [-d] [-meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}]
 
-#### Colorspace
-```
-'-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"]
-```
+Extract foreground from video.
 
-#### Alpha
-```
-'-a', '--alpha', metavar='N', nargs='+', type=float, default=11
-```
-
-#### Rho (p)
-```
-'-p', '--p', type=float, default=0.001
-```
+optional arguments:
+  -h, --help            show this help message and exit
+  -m {gm,agm,sota}, --model {gm,agm,sota}
+                        The model used for background modeling. Default value is 'gm':Gaussian.
+  -c {gray,rgb,hsv,lab,ycrcb}, --colorspace {gray,rgb,hsv,lab,ycrcb}
+                        choose the colorspace used for background modeling. Default value is 'gray
+  -M MAX, --max MAX     max number of frames for which to extract foreground. Set to '-1' by default.
+  -perc PERCENTAGE, --percentage PERCENTAGE
+                        percentage of video to use for background modeling
+  -a N [N ...], --alpha N [N ...]
+                        alpha value or values depending on color space used for modelling
+  -p P, --p P           Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion of new information to model
+  -d, --display         to display frames as they are processed
+  -meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}, --method {mog,mog2,lsbp,gmg,cnt,gsoc,knn}
+                        SOTA algorithm used for background subtraction. The '--model' parameter has to be set to 'sota' to be able to use this.
+````
 
 ## Random/Grid search
 There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
-
 
 
 # Week1

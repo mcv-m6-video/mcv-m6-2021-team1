@@ -123,14 +123,14 @@ def main(args):
 
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
-parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"], help="model used for background modeling")
-parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"], help="colorspace used for background modeling")
-parser.add_argument('-M', '--max', type=int, default=-1, help="max of frames for which infer foreground")
+parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"], help="The model used for background modeling. Default value is 'gm':Gaussian.")
+parser.add_argument('-c', '--colorspace', type=str, default='gray', choices=["gray", "rgb", "hsv", "lab", "ycrcb"], help="choose the colorspace used for background modeling. Default value is 'gray")
+parser.add_argument('-M', '--max', type=int, default=-1, help="max number of frames for which to extract foreground. Set to '-1' by default.")
 parser.add_argument('-perc', '--percentage', type=float, default=0.25, help="percentage of video to use for background modeling")
-parser.add_argument('-a', '--alpha', metavar='N', nargs='+', type=float, default=11, help="alpha value")
-parser.add_argument('-p', '--p', type=float, default=0.001, help="[AdaptiveGaussianModel] parameter controlling the inclusion of new information to model")
-parser.add_argument('-d', '--display', action='store_true', help="Display frames as they are processed or not")
-parser.add_argument('-meth', '--method', type=str, default='mog', choices=["mog", "mog2", "lsbp", "gmg", "cnt", "gsoc", "knn"], help="sota algorithm used to substract bg")
+parser.add_argument('-a', '--alpha', metavar='N', nargs='+', type=float, default=11, help="alpha value or values depending on color space used for modelling")
+parser.add_argument('-p', '--p', type=float, default=0.001, help="Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion of new information to model")
+parser.add_argument('-d', '--display', action='store_true', help="to display frames as they are processed")
+parser.add_argument('-meth', '--method', type=str, default='mog', choices=["mog", "mog2", "lsbp", "gmg", "cnt", "gsoc", "knn"], help="SOTA algorithm used for background subtraction. The '--model' parameter has to be set to 'sota' to be able to use this.")
 args = parser.parse_args()
 
 main(args)
