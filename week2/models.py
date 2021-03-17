@@ -75,7 +75,7 @@ class Model:
                 frame = self.cap.read()
                 counter += 1
             print("Background modeled!")
-            return
+            return counter
 
         # we add all images to the array
         self.save_images()
@@ -250,7 +250,7 @@ class Sota(Model):
         if method == "mog":
             self.method = cv2.bgsegm.createBackgroundSubtractorMOG(history=110, nmixtures=7)
         elif method == "mog2":
-            self.method = cv2.createBackgroundSubtractorMOG2()
+            self.method = cv2.createBackgroundSubtractorMOG2(history=100, varThreshold=15)
         elif method == "lsbp":
             self.method = cv2.bgsegm.createBackgroundSubtractorLSBP() 
         elif method == "gmg":
@@ -272,6 +272,7 @@ class Sota(Model):
         if not success:
             return None
         fgmask = self.method.apply(frame)
+        retval, fgmask = cv2.threshold(fgmask,128,255,cv2.THRESH_BINARY)
         return fgmask, frame
 
     def model_background(self):
@@ -281,4 +282,4 @@ class Sota(Model):
             frame = self.cap.read()
             counter += 1
         print("Background modeled!")
-        return
+        return counter

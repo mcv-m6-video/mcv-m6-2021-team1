@@ -18,8 +18,9 @@ TOTAL_FRAMES = 2141
 
 VIDEO_PATH = "../../Data/AICity_data/train/S03/c010/vdo.avi"
 # VIDEO_PATH = "../../AICity_data/train/S03/c010/vdo.avi"
-# VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
+#VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
 GT_RECTS_PATH = "../../Data/ai_challenge_s03_c010-full_annotation.xml"
+AI_GT_RECTS_PATH = "../../Data/AICity_data/train/S03/c010/gt/gt.txt"
 
 def main(args):
 
@@ -29,6 +30,9 @@ def main(args):
 
     model_frames = int(args.percentage * TOTAL_FRAMES)
 
+    imgs_gif_bf = [] #gif generation
+    imgs_gif_af = []
+    
     if args.model == "gm":
         model = GaussianModel(VIDEO_PATH, model_frames, args.alpha, \
                                 checkpoint=f"{args.colorspace}_{args.percentage}", colorspace=args.colorspace)
@@ -42,31 +46,39 @@ def main(args):
     elif args.model == "sota":
         model = Sota(VIDEO_PATH, model_frames, args.method)
         MODEL_NAME = "SOTA" + args.method
-        
+        args.model=args.method
+        results_path = f"results/{MODEL_NAME}/{args.colorspace}_{args.method}"
     else:
         raise Exception
 
-    model.model_background()
+    counter = model.model_background()
 
     if not os.path.exists(results_path):
         os.makedirs(results_path)
     writer = imageio.get_writer(f"{results_path}/video.mp4", fps=25)
 
+    det_rects = {}
+    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True)
+    gt_rects = {k:v for k,v in gt_rects.items() if int(k.split('_')[-1]) >= int(TOTAL_FRAMES*args.percentage)} # remove "training" frames
+
     foreground, I = model.compute_next_foreground()
+    foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
+    det_rects[f'f_{counter}'] = recs
     writer.append_data(foreground)
+    
     counter = int(TOTAL_FRAMES*args.percentage)
     det_rects = {}
-    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True) 
+    gt_rects = utils.parse_xml_rects(GT_RECTS_PATH, True)
+    gt_rects = {k:v for k,v in gt_rects.items() if int(k.split('_')[-1]) >= int(TOTAL_FRAMES*args.percentage)} # remove "training" frames
+
     gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
     while foreground is not None:
-        foreground, recs = detection.post_processing(foreground, display=args.display, adptative=args.model=='agm')
-
-        det_rects[f'f_{counter}'] = recs
 
         if args.display:
             utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
                 {'rects': gt_rects_detformat.get(f'f_{counter}', []), 'color': (0,255,0)}], 'result')
+
 
         #cv2.imwrite(f"results/{args.alpha}_{args.percentage}/fg_{counter}.png", foreground)
         writer.append_data(foreground)
@@ -75,12 +87,23 @@ def main(args):
         ret = model.compute_next_foreground()
         if ret:
             foreground, I = ret
+
+            if counter % 2 == 0:
+                imgs_gif_bf.append(foreground) #for gif generation
+
+            foreground, recs = detection.post_processing(foreground, display=args.display, method=args.model)
+
+            if counter % 2 == 0:
+                img_gif = utils.imshow_rects(I, [{'rects': recs, 'color': (0,0,255)}, 
+                    {'rects': gt_rects_detformat.get(f'f_{counter}', []), 'color': (0,255,0)}], 'result', disp=False)
+                imgs_gif_af.append(img_gif)
+
+            det_rects[f'f_{counter}'] = recs
         else:
             foreground = None
 
         if counter % 100 == 0:
             print(f"{counter} frames processed...")
-            print(foreground is None)
 
         if args.max != -1 and counter >= args.max:
             break
@@ -89,8 +112,15 @@ def main(args):
     writer.close()
     print(f"Saved to '{results_path}'")
 
+    # Remove first frames
+    # det_rects = utils.parse_aicity_rects("../../data/AICity_data/train/S03/c010/gt/gt.txt")
     mAP = utils.get_AP(gt_rects, det_rects)
     print('mAP:', mAP)
+
+    imageio.mimsave(f'{results_path}/before.gif', imgs_gif_bf[:200])
+    imgs_gif_af = [cv2.cvtColor(f_gif, cv2.COLOR_BGR2RGB) for f_gif in imgs_gif_af]
+    imageio.mimsave(f'{results_path}/after.gif', imgs_gif_af[:200])
+
 
 parser = argparse.ArgumentParser(description='Extract foreground from video.')
 parser.add_argument('-m', '--model', type=str, default='gm', choices=["gm", "agm", "sota"], help="model used for background modeling")
