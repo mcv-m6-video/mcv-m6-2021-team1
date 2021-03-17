@@ -80,7 +80,6 @@ def main(args):
 
         if counter % 100 == 0:
             print(f"{counter} frames processed...")
-            print(foreground is None)
 
         if args.max != -1 and counter >= args.max:
             break
