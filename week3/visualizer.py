@@ -50,13 +50,21 @@ detections = [
         'color': (0, 0, 255),
         'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
     },
+    {
+        'name': 'retina',
+        'color': (255, 0, 0),
+        'rects': utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
+    },
 ]
 
+print([ k for k in detections[2]['rects']])
+quit()
 def main(display=True):
 
     # Create output dirs
     os.makedirs(os.path.join(OUT_DIR, 'snapshots'), exist_ok=True)
     os.makedirs(os.path.join(OUT_DIR, 'gifs'), exist_ok=True)
+    os.makedirs(os.path.join(OUT_DIR, 'frames'), exist_ok=True)
 
     # Render video
     cap = cv2.VideoCapture(VIDEO_PATH)
@@ -69,7 +77,6 @@ def main(display=True):
     gif_buffer = None
     gifs_to_save = {}
     while(ret):
-
         # Render detections
         for det in detections:
             frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'])
