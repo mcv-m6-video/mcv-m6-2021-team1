@@ -4,7 +4,7 @@ import utils
 
 # 2141 frames in total
 TOTAL_FRAMES = 2141
-TOTAL_FRAMES = 200
+TOTAL_FRAMES = 5
 
 
 VIDEO_PATH = "../data/AICity_data/train/S03/c010/vdo.avi"
@@ -21,6 +21,7 @@ class tracked_object:
         self.id = idd
         self.bbox = bbox
         self.tracker_life = tracker_life
+        self.not_live = 0
         self._add_track()
 
     def _add_track(self):
@@ -35,13 +36,14 @@ def adj_track(det_bbox):
 
     for id_t in tracked_object_dic:
 
-        iou = utils.get_rect_iou(tracked_object_dic[id_t].bbox, det_bbox)
-        
+        iou = utils.get_rect_iou(tracked_object_dic[id_t].bbox, det_bbox)    
         if iou > best_iou:
             best_iou = iou
             idx = id_t
-        
-    if int(idx) != -1 and iou > 0.5:
+
+    print('BEST: ',idx)
+    print('iou: ', best_iou)
+    if int(idx) != -1 and best_iou > 0.5:
         tracked_object_dic[idx].tracker_life = 5
         tracked_object_dic[idx].bbox = det_bbox
     else:
@@ -51,8 +53,15 @@ def adj_track(det_bbox):
     return idx
 
 def decrease_memory():
+    deleting_list = []
     for idx in tracked_object_dic:
-        tracked_object_dic[idx].tracker_life -= 1
+        if tracked_object_dic[idx].tracker_life > 0:
+            tracked_object_dic[idx].tracker_life -= 1
+        else:
+            deleting_list.append(idx)
+        
+    for idx in deleting_list:
+        del tracked_object_dic[idx]
 
 def main():
 
@@ -65,7 +74,9 @@ def main():
             det['id'] = adj_track(det['bbox'])
             decrease_memory()
             print(det)
-    
+        print('NEW FRAME')
+    utils.save_tracking(det_rects)
+    print(len(tracked_object_dic))
 
 if __name__ == '__main__':
     main()
