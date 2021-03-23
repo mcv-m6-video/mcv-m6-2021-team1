@@ -75,7 +75,7 @@ def main():
             decrease_memory()
             print(det)
         print('NEW FRAME')
-    utils.save_tracking(det_rects)
+    utils.save_aicity_rects('test.txt', det_rects)
     print(len(tracked_object_dic))
 
 if __name__ == '__main__':

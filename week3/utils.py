@@ -83,6 +83,14 @@ def parse_aicity_rects(path):
 
     return ret_dict
 
+def save_aicity_rects(path, det_rects)
+
+   COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
+
+    df = pd.DataFrame(det_rects, columns=COL_NAMES)
+    df.to_csv (path, index = False, header=True)
+
+
 
 def parse_xml_rects(path, remove_static=False):
     """
