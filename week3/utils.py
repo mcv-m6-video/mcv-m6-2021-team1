@@ -87,11 +87,11 @@ def save_aicity_rects(path, det_rects):
 
     COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
     dic_csv = {
-        'frame' = [], 'id'= [], 'bb_left'= [], 'bb_top'= [], 'bb_width'= [], 'bb_height'= [], 'conf'= [], 'x'= [], 'y'= [], 'z'= []
+        'frame' : [], 'id': [], 'bb_left': [], 'bb_top': [], 'bb_width': [], 'bb_height': [], 'conf': [], 'x': [], 'y': [], 'z': []
     }
     for f in det_rects:
-        for det in det_rects[f'f_{f}']:
-            dic_csv['frame'].append(f)
+        for det in det_rects[f]:
+            dic_csv['frame'].append(f[2:])
             dic_csv['id'].append(det['id'])
             dic_csv['bb_left'].append(det['bbox'][0])
             dic_csv['bb_top'].append(det['bbox'][1])
@@ -102,8 +102,8 @@ def save_aicity_rects(path, det_rects):
             dic_csv['y'].append(-1)
             dic_csv['z'].append(-1)
 
-    df = pd.DataFrame(det_rects, columns=COL_NAMES)
-    df.to_csv (path, index = False, header=True)
+    df = pd.DataFrame(dic_csv, columns=COL_NAMES)
+    df.to_csv (path, index = False, header=False)
 
 
 
