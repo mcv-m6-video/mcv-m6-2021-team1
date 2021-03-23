@@ -18,6 +18,8 @@ Input data:
                 }
 """
 import os
+import random
+import colorsys
 import datetime as dt
 import cv2
 import imageio
@@ -42,6 +44,12 @@ def gif_preprocess(im, width=512):
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
 
+
+def get_random_col():
+    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
+    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
+    return (b, g, r)
+
 # Load detections
 print('Loading detections...')
 detections = [
@@ -51,18 +59,37 @@ detections = [
         'color': (0, 255, 0),
         'rects': utils.parse_xml_rects(GT_RECTS_PATH)
     },
-    {
-        'name': 'aigt',
-        'full-name': 'AI City GT',
-        'color': (0, 0, 255),
-        'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
-    },
+    # {
+    #     'name': 'aigt',
+    #     'full-name': 'AI City GT',
+    #     'color': (0, 0, 255),
+    #     'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
+    # },
     {
         'name': 'retina 50',
         'full-name': 'Retina Net R50 FPN 3x rp 128',
-        'color': (255, 0, 0),
+        'color': get_random_col(),
         'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
     },
+    {
+        'name': 'yolo',
+        'full-name': 'YOLO',
+        'color': get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt', zero_index=1)
+    },
+        {
+        'name': 'ssd',
+        'full-name': 'single shot detection 512',
+        'color': get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
+    },
+        {
+        'name': 'rcnn',
+        'full-name': 'Mask RCNN',
+        'color': get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
+    },
+
 ]
 
 def main(display=True):
@@ -97,12 +124,20 @@ def main(display=True):
             # Display info
             wait_time = WAIT_TIME_LIST[wait_time_idx % len(WAIT_TIME_LIST)]
             FPS = int(1e3/wait_time if wait_time != 0 else 0)
-            rec = '[REC]' if gif_buffer else '[   ]'
+            rec = '[REC]' if gif_buffer else '[___]'
+
+            h, w = frame.shape[:2]
+            x, y = int(w*0.75), int(h*0.8)
 
             info = f'{FPS} FPS {rec}'
             h, w = frame.shape[:2]
-            frame = cv2.putText(frame, info, (int(w*0.9), int(h*0.95)), cv2.FONT_HERSHEY_COMPLEX_SMALL, utils.get_optimal_font_scale(info, 0.1*w), (0,0,255))
+            frame = cv2.putText(frame, info, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
+                utils.get_optimal_font_scale(info, w*0.1), (0, 0, 255), 2)
 
+            for det in detections:
+                y += 25
+                frame = cv2.putText(frame, det['full-name'], (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
+                    utils.get_optimal_font_scale(info, w*0.1), det['color'], 2)
 
             # Display
             display_frame = utils.resize_keep_ap(frame, height=800)
