@@ -11,7 +11,8 @@ VIDEO_PATH = "../data/AICity_data/train/S03/c010/vdo.avi"
 # AI_GT_RECTS_PATH = "../data/AICity_data/train/S03/c010/gt/gt.txt"
 DETECTIONS = 'm6-aicity_retinanet_R_50_FPN_3x_rp128.txt'
 
-tracked_object_list = []
+tracked_object_dic = {}
+TRACKS_COUNTER = 0
 
 class tracked_object:
 
@@ -24,13 +25,37 @@ class tracked_object:
 
     def _add_track(self):
         tracked_object_list.append(self)
+        return
 
 
-def adj_track():
+def adj_track(det_bbox):
         # to access to iou_matrix: iou_matrix[detector_index][tracker_index]
-    if len(detector_bboxes) > 0:
-        iou_matrix = [[1 - get_rect_iou(t_det.bbox, det_bbox) for t_det in tracker_bboxes]
-                        for det_bbox in detector_bboxes]
+    if len(det_bbox) > 0:
+        
+        for bbox in det_bbox:
+            min_iou = 1
+            idx = -1
+            best_track = None
+            for track_obj in tracked_object_list:
+    
+                iou = 1 - get_rect_iou(track_obj.bbox, det_bbox)
+                if min_iou > iou:
+                    min_iou = iou
+                    idx = track_obj.id
+            print min_iou
+                
+            if idx == -1:
+
+                TRACKS_COUNTER+=1
+                track_obj(bbox)
+                tracked_object_dic[tracked_object_dic]
+            else:
+                if iou < 0.5: 
+                track_obj.tracker_life  = 5
+
+                
+        # iou_matrix = [[1 - get_rect_iou(t_det.bbox, det_bbox) for t_det in tracker_bboxes]
+        #                 for det_bbox in detector_bboxes]
 
         idxs = Munkres().compute(iou_matrix)
     return id
@@ -46,7 +71,7 @@ def main():
             bbox = det['bbox']
             conf = det['conf']
             det['id'] = adj_track(bbox)
-            
+
         print(det_rects[f'f_{f}'])
     #gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
 
