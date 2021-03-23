@@ -21,10 +21,10 @@ class tracked_object:
         self.id = idd
         self.bbox = bbox
         self.tracker_life = tracker_life
-        _add_track(self)
+        self._add_track()
 
     def _add_track(self):
-        tracked_object_dic[idd] = self
+        tracked_object_dic[self.id] = self
         return
 
 
@@ -35,7 +35,7 @@ def adj_track(det_bbox):
 
     for id_t in tracked_object_dic:
 
-        iou = get_rect_iou(tracked_object_dic[id_t].bbox, det_bbox)
+        iou = utils.get_rect_iou(tracked_object_dic[id_t].bbox, det_bbox)
         
         if iou > best_iou:
             best_iou = iou
