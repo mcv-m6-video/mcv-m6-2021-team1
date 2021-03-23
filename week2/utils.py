@@ -75,6 +75,7 @@ def parse_aicity_rects(path):
         if frame_num not in ret_dict:
             ret_dict[frame_num] = []
         obj = {
+            'id': int(row.id),
             'bbox': [row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height],
             'conf': float(row.conf)
         }

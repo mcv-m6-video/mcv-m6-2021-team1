@@ -1,0 +1,3 @@
+[submodule "week3/kalman/pysot"]
+	path = week3/kalman/pysot
+	url = https://github.com/STVIR/pysot.git

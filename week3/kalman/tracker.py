@@ -1,7 +1,7 @@
 import collections
-from single_tracker import SingleTracker
+from week3.kalman.single_tracker import SingleTracker
 from munkres import Munkres
-from tracking_utils import compute_intersection_over_union
+from week3.kalman.tracking_utils import compute_intersection_over_union
 
 
 Detection = collections.namedtuple('Detection', 'track_id bbox score from_tracker')
@@ -108,8 +108,12 @@ class TracksManager:
                                                 from_tracker=True))
                     track_ids_associated.append(track_id)
                     associated_det_indexs.append(det_index)
+
                     # Tracked object was found! => reset with the detection box (which should be more accurate)
-                    if 1 - iou_matrix[det_index][tr_index] < 0.85 and score > 0.8:
+                    if self.tracker_type == "kalman":
+                        self.trackers[track_id].update_state(det_bbox)
+                        self.__found_tracker(track_id) # we do not reset it for performance issues
+                    elif self.tracker_type in ["iou", "kcf", "csrt"] or 1 - iou_matrix[det_index][tr_index] < 0.85:
                         self.__reset_tracker(frame, track_id, det_bbox)
                     else:
                         self.__found_tracker(track_id) # we do not reset it for performance issues

@@ -1,11 +1,13 @@
 
 
 import sys
+sys.path.append("./week3/kalman/pysot")
 from pysot.core.config import cfg
 from pysot.models.model_builder import ModelBuilder
 from pysot.tracker.tracker_builder import build_tracker
 from pysot.utils.model_load import load_pretrain
-from static_tracker import StaticTracker
+from week3.kalman.static_tracker import StaticTracker
+from week3.kalman.kalman_tracker import KalmanTracker
 import torch
 import cv2
 
@@ -25,9 +27,9 @@ PYSOT_TRACKERS = {
 
 
 def load_pysot_model(tracker_type):
-    configpath = "../tracking/pysot/experiments/" + OPENCV_TRACKERS[tracker_type] + \
+    configpath = "./week3/kalman/pysot/experiments/" + PYSOT_TRACKERS[tracker_type] + \
                  "/config.yaml"
-    modelpath = "../tracking/pysot/models/" + PYSOT_TRACKERS[tracker_type] + ".pth"
+    modelpath = "./week3/kalman/pysot/models/" + PYSOT_TRACKERS[tracker_type] + ".pth"
 
     cfg.merge_from_file(configpath)
     cfg.CUDA = torch.cuda.is_available()
@@ -51,8 +53,12 @@ class SingleTracker:
             self.tracker = OPENCV_TRACKERS[tr]()
         elif tr in PYSOT_TRACKERS:
             self.tracker = build_tracker(load_pysot_model(self.type))
+        elif tr == "kalman":
+            self.tracker = KalmanTracker()
+        elif tr == "iou":
+            self.tracker = StaticTracker()
         else:
-            self.tracker = IdentityTracker()
+            raise Exception("Tracker not supported")
 
     def init(self, frame, bbox):
         if self.tracker is None:
@@ -67,9 +73,13 @@ class SingleTracker:
 
     # Returns (success, bbox) with bbox as (x0, y0, x, y)
     def track(self, frame):
-        if self.type in AVAILABLE_PYSOT_TRACKERS:
+        if self.type in PYSOT_TRACKERS:
             tracked = self.tracker.track(frame)
             (success, (x, y, w, h)) = tracked['best_score'] > self.PYSOT_TRACKER_THRESHOLD, list(map(int, tracked['bbox']))
         else:
             (success, (x, y, w, h)) = self.tracker.update(frame)
         return success, (x, y, x + w, y + h)
+
+    def update_state(self, bbox):
+        if self.type == "kalman":
+            self.tracker.update_state(bbox)
