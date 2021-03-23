@@ -30,25 +30,24 @@ class tracked_object:
 
 def adj_track(det_bbox):
         # to access to iou_matrix: iou_matrix[detector_index][tracker_index]
-            min_iou = 1
+            best_iou = 0
             idx = -1
-            best_track = None
+
             for id_t in tracked_object_dic:
                 to = tracked_object_dic[id_t]
                 iou = get_rect_iou(to.bbox, det_bbox)
-                if min_iou > iou:
-                    min_iou = iou
+                if iou > best_iou:
+                    best_iou = iou
                     idx = track_obj.id
-            print min_iou
                 
-            if idx == -1:
+            if idx != -1 and iou > 0.5:
+                 track_obj.tracker_life  = 5
 
-                TRACKS_COUNTER+=1
+            else:
                 track_obj(bbox)
                 tracked_object_dic[tracked_object_dic]
-            else:
-                if iou < 0.5: 
-                track_obj.tracker_life  = 5
+                TRACKS_COUNTER+=1
+               
 
                 
         # iou_matrix = [[1 - get_rect_iou(t_det.bbox, det_bbox) for t_det in tracker_bboxes]
