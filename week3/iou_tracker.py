@@ -6,16 +6,17 @@ import utils
 TOTAL_FRAMES = 2141
 TOTAL_FRAMES = 200
 
+
 VIDEO_PATH = "../data/AICity_data/train/S03/c010/vdo.avi"
 # GT_RECTS_PATH = "../data/ai_challenge_s03_c010-full_annotation.xml"
 # AI_GT_RECTS_PATH = "../data/AICity_data/train/S03/c010/gt/gt.txt"
 DETECTIONS = 'm6-aicity_retinanet_R_50_FPN_3x_rp128.txt'
 
 tracked_object_dic = {}
-TRACKS_COUNTER = 0
+
 
 class tracked_object:
-
+    TRACKS_COUNTER = 0
     def __init__(self, idd, bbox, tracker_life = 5):
         self.id = idd
         self.bbox = bbox
@@ -42,11 +43,11 @@ def adj_track(det_bbox):
         
     if int(idx) != -1 and iou > 0.5:
         tracked_object_dic[idx].tracker_life = 5
-        tracked_object_dic[idx].bbox = bbox
+        tracked_object_dic[idx].bbox = det_bbox
     else:
-        idx = str(TRACKS_COUNTER)
-        track_obj(idx, bbox)
-        TRACKS_COUNTER+=1
+        idx = str(tracked_object.TRACKS_COUNTER)
+        tracked_object(idx, det_bbox)
+        tracked_object.TRACKS_COUNTER+=1
     return idx
 
 def decrease_memory():
@@ -65,4 +66,6 @@ def main():
             decrease_memory()
             print(det)
     
-main()
+
+if __name__ == '__main__':
+    main()
