@@ -15,3 +15,7 @@ __pycache__/
 *dev/
 
 */runs/
+
+# Week 3
+*out_visualizer/
+*detections/

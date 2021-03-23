@@ -1,6 +1,6 @@
-import cv2
-import random
 import os
+import random
+import cv2
 import imageio
 import pandas as pd
 import numpy as np
@@ -74,6 +74,7 @@ def parse_aicity_rects(path, zero_index=1):
 
         if frame_num not in ret_dict:
             ret_dict[frame_num] = []
+
         obj = {
             'bbox': [row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height],
             'conf': float(row.conf),
