@@ -75,15 +75,19 @@ def main(display=True):
             frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'])
  
         if display:
-            # Resize
-            display_frame = utils.resize_keep_ap(frame, height=800)
 
-            # Display speed
+            # Display info
             wait_time = WAIT_TIME_LIST[wait_time_idx % len(WAIT_TIME_LIST)]
-            os.system('clear')
-            print(f'Speed: {1e3/wait_time if wait_time != 0 else 0} FPS')
+            FPS = int(1e3/wait_time if wait_time != 0 else 0)
+            rec = '[REC]' if gif_buffer else '[   ]'
+
+            info = f'{FPS} FPS {rec}'
+            h, w = frame.shape[:2]
+            frame = cv2.putText(frame, info, (int(w*0.9), int(h*0.95)), cv2.FONT_HERSHEY_COMPLEX_SMALL, utils.get_optimal_font_scale(info, 0.1*w), (0,0,255))
+
 
             # Display
+            display_frame = utils.resize_keep_ap(frame, height=800)
             cv2.imshow('frame', display_frame)
 
             # Keyboard controls
@@ -106,7 +110,6 @@ def main(display=True):
 
         # Gif
         if gif_buffer:
-            print('Update gif')
             gif_buffer.append(gif_preprocess(frame))
 
         ret, frame = cap.read()
