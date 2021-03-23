@@ -30,15 +30,12 @@ class tracked_object:
 
 def adj_track(det_bbox):
         # to access to iou_matrix: iou_matrix[detector_index][tracker_index]
-    if len(det_bbox) > 0:
-        
-        for bbox in det_bbox:
             min_iou = 1
             idx = -1
             best_track = None
-            for track_obj in tracked_object_list:
-    
-                iou = 1 - get_rect_iou(track_obj.bbox, det_bbox)
+            for id_t in tracked_object_dic:
+                to = tracked_object_dic[id_t]
+                iou = get_rect_iou(to.bbox, det_bbox)
                 if min_iou > iou:
                     min_iou = iou
                     idx = track_obj.id
@@ -68,9 +65,7 @@ def main():
     for f in range(TOTAL_FRAMES):
         det_rects[f'f_{f}'] #detections per frame
         for det in det_rects[f'f_{f}']:
-            bbox = det['bbox']
-            conf = det['conf']
-            det['id'] = adj_track(bbox)
+            det['id'] = adj_track(det['bbox'])
 
         print(det_rects[f'f_{f}'])
     #gt_rects_detformat = {f: [{'bbox': r, 'conf':1} for r in v] for f, v in gt_rects.items()}
