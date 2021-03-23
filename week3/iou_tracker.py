@@ -62,46 +62,11 @@ def decrease_memory():
     for idx in deleting_list:
         del tracked_object_dic[idx]
 
-def get_idf1(det_rects, gt_rects):
-
-    tracks_dic = {}
-
-    score_dic = {
-        'id_det' : -1,
-        'total' : 0,
-        'tp': 0,
-        'fp': 0,
-        'fn': 0
-    }
-
-
-
-    # for f in gt_rects:
-    #     for tracks in gt_rects[f]:
-    #         if track['id'] not in tracks_dic:
-    #             tracks_dic[tracks['id']] = score_dic
-
-    #         best_iou = 0
-    #         id_t = -1
-    #         for t_det in det_rects[f]:
-
-    #             iou = utils.get_rect_iou(tracks['bbox'], t_det['bbox'])
-    #             if iou > best_iou:
-    #                 best_iou = iou
-    #                 id_t = t_det['id']
-    #         if id_t == tracks_dic[tracks['id']]['id_det']
-    #         #tracks_dic[tracks['id']]['id_det'] = id_t
-
-
-    
-
-
 
 def main():
 
     det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
     
-    #{'bbox': [1190.155517578125, 102.54630279541016, 1341.8289794921875, 179.31149291992188], 'conf': 0.070556417107582, 'id': -1},
     order = sorted(det_rects, key=lambda x: int(x[2:]) )
     for f in order:
         for det in det_rects[f]:
@@ -117,6 +82,5 @@ def main():
     get_idf1(det_rects, gt_rects)
 
 if __name__ == '__main__':
-    dt = utils.parse_xml_rects(GT_RECTS_PATH)
-    utils.save_aicity_rects('full_gt.txt', dt)
-   # main()
+
+   main()
