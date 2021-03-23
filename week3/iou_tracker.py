@@ -65,7 +65,7 @@ def decrease_memory():
 
 def main():
 
-    det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
+    det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', 0)
     
     order = sorted(det_rects, key=lambda x: int(x[2:]) )
     for f in order:
@@ -77,9 +77,6 @@ def main():
         # print('NEW FRAME:', len(tracked_object_dic))
     utils.save_aicity_rects('test.txt', det_rects)
     print(len(tracked_object_dic))
-
-    gt_rects = utils.parse_aicity_rects(GT_RECTS_PATH)
-    get_idf1(det_rects, gt_rects)
 
 if __name__ == '__main__':
 

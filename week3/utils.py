@@ -56,6 +56,15 @@ def non_max_suppression_fast(boxes, overlapThresh):
 	# integer data type
 	return pick #boxes[pick].astype("int")
 
+def fix_zero_idx(path):
+
+    dt_rec = parse_aicity_rects(path, 0)
+    dt_fix = {}
+    for f in dt_rec:
+        dt_fix[f'f_{int(f[2:])+1}'] = dt_rec[f]
+    save_aicity_rects(path,dt_fix)
+    return
+
 
 def parse_aicity_rects(path, zero_index=1):
     """
