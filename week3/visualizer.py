@@ -33,7 +33,9 @@ VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
 GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
 AI_GT_RECTS_PATH = "../../data/AICity_data/train/S03/c010/gt/gt.txt"
 OUT_DIR = 'out_visualizer'
+
 AP_thresh = 0.5
+conf_thresh = 0.5
 
 def gif_preprocess(im, width=512):
     im = utils.resize_keep_ap(im, width=width)
@@ -88,7 +90,7 @@ def main(display=True):
     while(ret):
         # Render detections
         for det in detections:
-            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'])
+            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'], conf_thresh=conf_thresh)
  
         if display:
 

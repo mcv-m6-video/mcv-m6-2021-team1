@@ -140,8 +140,11 @@ def get_optimal_font_scale(text, width):
     return 1
 
 
-def pretty_rects(im, objs, name, color):
+def pretty_rects(im, objs, name, color, conf_thresh=0.0):
     for obj in objs:
+        if float(obj["conf"]) < conf_thresh:
+            continue
+
         bb = obj['bbox']
         h = bb[3] - bb[1]
         w = bb[2] - bb[0]
