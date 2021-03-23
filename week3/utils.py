@@ -104,7 +104,7 @@ def save_aicity_rects(path, det_rects):
             dic_csv['z'].append(-1)
 
     df = pd.DataFrame(dic_csv, columns=COL_NAMES)
-    df.to_csv (path, index = False, header=False)
+    df.to_csv(path, index = False, header=False)
 
 
 
@@ -175,7 +175,7 @@ def pretty_rects(im, objs, name, color, conf_thresh=0.0):
         im = cv2.rectangle(im, (int(bb[0]), int(bb[1])), (int(bb[2]), int(bb[3])), color, 2)
 
         # Write name and conf
-        text = f'{name} {obj["id"]}- {100*obj["conf"]} %'
+        text = f'{name} {obj["id"]}- {int(100*obj["conf"])} %'
         # "Background" for label
         im = cv2.rectangle(im, 
             (int(bb[0]), int(bb[1])),
