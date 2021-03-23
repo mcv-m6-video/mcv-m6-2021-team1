@@ -53,12 +53,10 @@ detections = [
     {
         'name': 'retina',
         'color': (255, 0, 0),
-        'rects': utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
+        'rects': utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
     },
 ]
 
-print([ k for k in detections[2]['rects']])
-quit()
 def main(display=True):
 
     # Create output dirs

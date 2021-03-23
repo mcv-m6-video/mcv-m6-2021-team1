@@ -57,7 +57,7 @@ def non_max_suppression_fast(boxes, overlapThresh):
 	return pick #boxes[pick].astype("int")
 
 
-def parse_aicity_rects(path):
+def parse_aicity_rects(path, zero_index=1):
     """
     Input:
         - Path to annotation xml in AI City format
@@ -70,7 +70,7 @@ def parse_aicity_rects(path):
     dtf = pd.read_csv(path, delimiter=',', names=COL_NAMES)
 
     for i, row in dtf.iterrows():
-        frame_num = f'f_{int(row.frame) - 1}'
+        frame_num = f'f_{int(row.frame) - zero_index}'
 
         if frame_num not in ret_dict:
             ret_dict[frame_num] = []
@@ -89,7 +89,7 @@ def parse_xml_rects(path, remove_static=False):
     Input:
         - Path to annotation xml in Pascal VOC format
     Output format:
-        dict[frame_num] = [[x1, y1, x2, y2]]
+        dict[frame_num] = [{'bbox':[x1, y1, x2, y2], 'conf': 1, 'id': -1}]
     """
     tree = ET.parse(path)
     root = tree.getroot()
@@ -300,8 +300,6 @@ def get_AP(gt_rects, det_rects, ovthresh=0.5):
     gt_rects: ground truth rects in format dict[frame_num] = [[x1, y1, x2, y2]]
     det_rects: detection rects in format dict[frame_num] = [[x1, y1, x2, y2]]
     [ovthresh]: Overlap threshold (default = 0.5)
-    [use_07_metric]: Whether to use VOC07's 11 point AP computation
-        (default False)
     """
     # parse gt_rects a esto
     # class_recs = {
@@ -314,13 +312,13 @@ def get_AP(gt_rects, det_rects, ovthresh=0.5):
 
     class_recs = {}
     npos = 0
-    for frame, bboxs in gt_rects.items():
+    for frame, objs in gt_rects.items():
         class_recs[frame] = {
-            'bbox': bboxs,
-            'difficult': np.array([False]*len(bboxs)).astype(np.bool),
-            'det': [False]*len(bboxs)
+            'bbox': [obj['bbox'] for obj in objs],
+            'difficult': np.array([False]*len(objs)).astype(np.bool),
+            'det': [False]*len(objs)
         }
-        npos += len(bboxs)
+        npos += len(objs)
 
     # image_ids = [0] # frame ids?
     # confidence = np.array([1]) # confidence for each detection
