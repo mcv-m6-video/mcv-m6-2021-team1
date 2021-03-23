@@ -129,7 +129,7 @@ def run_search():
             mAP = -1
         results.append((args.model, args.alpha, args.p, mAP))
 
-    df = pd.DataFrame(data=results, columns=["model", "alpha", "p", "mAP"])
+    df = pd.DataFrame(data=results, columns=["model", "alpha", "mAP"])
     df.to_csv(args.output, index=False)
 
 
