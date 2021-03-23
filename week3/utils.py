@@ -8,7 +8,6 @@ import xml.etree.ElementTree as ET
 from sklearn.metrics import average_precision_score
 from matplotlib import pyplot as plt
 
-
 # Malisiewicz et al.
 def non_max_suppression_fast(boxes, overlapThresh):
 	# if there are no boxes, return an empty list
