@@ -65,17 +65,18 @@ def decrease_memory():
 
 def main():
 
-    det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
+    detections_name = 'det_ssd512.txt'
+    det_rects = utils.parse_aicity_rects(f'detections/{detections_name}')
     
     order = sorted(det_rects, key=lambda x: int(x[2:]) )
     for f in order:
         for det in det_rects[f]:
-            if det['conf'] > 0.5:
+            if det['conf'] > 0.6:
                 det['id'] = adj_track(det['bbox'])
             # print(det)
         decrease_memory()
         # print('NEW FRAME:', len(tracked_object_dic))
-    utils.save_aicity_rects('track_m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', det_rects)
+    utils.save_aicity_rects(f'../../metric_jonathon/trackers_folder/track_{detections_name}', det_rects)
     print(len(tracked_object_dic))
 
 if __name__ == '__main__':
