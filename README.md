@@ -23,6 +23,14 @@ tldr:
 - On windows you must look for an installer [here](https://eternallybored.org/misc/gifsicle/)
 - On Mac no further action (apart from pip install) is required, so you just relax and see your investment on Apple payoff.
 
+If you want to use the state-of-the-art trackers implemented as part of the task 2.2, you need to run
+
+    ```
+    git submodule update --init --recursive
+    ```
+    
+And follow the [installation instructions](https://github.com/STVIR/pysot/blob/master/INSTALL.md) from the PySot submodule.
+
 ## Data format
 This week we have embraced MOTS Challenge format as our *official*  file format. All object labelling and detection is stored on a txt with **a line per detection** with the following format: 
 
@@ -89,6 +97,32 @@ USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+I
 > you can check if you are recording or not together with FPS information on the bottom right corner of the video
 
 > Note a new folder is generated inside out_visualizer on each execution of the program.
+
+## 2.2. Kalman tracking + state-of-the-art trackers
+All trackers were implemented under the same architecture so they can be easily run and tested using the file:
+````
+$ python w3_run_kalman.py -h
+usage    w3_run_kalman.py [-h] [-o OUTPUT] [-d DETECTIONS] [-t TRACKER]
+                        [-th THRESHOLD] [-tl TRACKER_LIFE] [-M MAX]
+
+optional arguments:optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -d DETECTIONS, --detections DETECTIONS
+                        detections used for tracking. Options: {retinanetpre, retinanet101pre, maskrcnnpre, ssdpre, yolopre}
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life
+  -M MAX, --max MAX     max number of frames to run the tracker (by default it runs all video).
+                        Set to '-1' by default.
+
+````
+
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
 
 
 # <a name="w1"></a> Week 2
