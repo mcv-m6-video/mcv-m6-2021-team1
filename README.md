@@ -56,7 +56,7 @@ We have created a script for showing the video with our results, be it detection
             'full-name': 'Ground truth',
             'color': (0, 255, 0),
             'rects': utils.parse_xml_rects(GT_RECTS_PATH),
-            'tracking': True
+            'tracking': False
         },
         {
             'name': 'R101+IoU',
