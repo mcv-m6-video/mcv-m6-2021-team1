@@ -18,8 +18,6 @@ Input data:
                 }
 """
 import os
-import random
-import colorsys
 import datetime as dt
 import cv2
 import imageio
@@ -30,25 +28,24 @@ import matplotlib.pyplot as plt
 import utils
 import detection
 
+from pygifsicle import optimize
+
+USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+IoU']
+
 TOTAL_FRAMES = 2141
 VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
 GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
 AI_GT_RECTS_PATH = "../../data/AICity_data/train/S03/c010/gt/gt.txt"
 OUT_DIR = 'out_visualizer'
 
+tracking = True
 AP_thresh = 0.5
-conf_thresh = 0.4
+conf_thresh = 0.
 
 def gif_preprocess(im, width=512):
     im = utils.resize_keep_ap(im, width=width)
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
-
-
-def get_random_col():
-    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
-    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
-    return (b, g, r)
 
 # Load detections
 print('Loading detections...')
@@ -57,40 +54,56 @@ detections = [
         'name': 'gt',
         'full-name': 'Ground truth',
         'color': (0, 255, 0),
-        'rects': utils.parse_xml_rects(GT_RECTS_PATH)
+        'rects': utils.parse_xml_rects(GT_RECTS_PATH),
+        'tracking': True
     },
     {
-        'name': 'IOU',
-        'full-name': 'tracking_iou',
-        'color': (0, 0, 255),
-        'rects': utils.parse_aicity_rects('test.txt', zero_index=0)
+        'name': 'R101+IoU',
+        'full-name': 'Retina Net R1o1 FPN 3x rp 128 + IoU tracking',
+        'color': utils.get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/retina101_track.txt', zero_index=0),
+        'tracking': True
     },
+    # {
+    #     'name': 'IOU',
+    #     'full-name': 'tracking_iou',
+    #     'color': (0, 0, 255),
+    #     'rects': utils.parse_aicity_rects('test.txt'),
+    #     'tracking' : True
+    # },
     # {
     #     'name': 'retina 50',
     #     'full-name': 'Retina Net R50 FPN 3x rp 128',
-    #     'color': get_random_col(),
+    #     'color': utils.get_random_col(),
     #     'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
+    # },
+    # {
+    #     'name': 'retina 101',
+    #     'full-name': 'Retina Net R101 FPN 3x rp 128',
+    #     'color': utils.get_random_col(),
+    #     'rects': utils.parse_aicity_rects('./detections/retina101.txt')
     # },
     # {
     #     'name': 'yolo',
     #     'full-name': 'YOLO',
-    #     'color': get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt', zero_index=1)
+    #     'color': utils.get_random_col(),
+    #     'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt')
     # },
     #     {
     #     'name': 'ssd',
     #     'full-name': 'single shot detection 512',
-    #     'color': get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
+    #     'color': utils.get_random_col(),
+    #     'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt')
     # },
     #     {
     #     'name': 'rcnn',
     #     'full-name': 'Mask RCNN',
-    #     'color': get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
+    #     'color': utils.get_random_col(),
+    #     'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt')
     # },
 
 ]
+
 
 def main(display=True):
 
@@ -117,8 +130,10 @@ def main(display=True):
     while(ret):
         # Render detections
         for det in detections:
-            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'], conf_thresh=conf_thresh)
- 
+            if det['name'] not in USE_DET:
+                continue
+            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'],
+                conf_thresh=conf_thresh, tracking = det.get('tracking', False))
         if display:
 
             # Display info
@@ -135,6 +150,8 @@ def main(display=True):
                 utils.get_optimal_font_scale(info, w*0.1), (0, 0, 255), 2)
 
             for det in detections:
+                if det['name'] not in USE_DET:
+                    continue
                 y += 25
                 frame = cv2.putText(frame, det['full-name'], (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
                     utils.get_optimal_font_scale(info, w*0.1), det['color'], 2)
@@ -177,6 +194,7 @@ def main(display=True):
         for path, buffer in gifs_to_save.items():
             print(path, '...')
             imageio.mimsave(path, buffer)
+            optimize(path)
 
     # Compute APs
     with open(os.path.join(out_dir, 'AP_results.txt'), 'a') as fp:
@@ -184,6 +202,8 @@ def main(display=True):
         fp.write(f'AP {AP_thresh}\n')
         gt = detections[0]['rects']
         for det in detections[1:]:
+            if det['name'] not in USE_DET:
+                continue
             AP = utils.get_AP(gt, det['rects'], ovthresh=AP_thresh)
             fp.write(f'{det["full-name"]}: {AP}\n')
 

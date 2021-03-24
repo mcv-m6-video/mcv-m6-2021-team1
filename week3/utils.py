@@ -7,6 +7,10 @@ import numpy as np
 import xml.etree.ElementTree as ET
 from sklearn.metrics import average_precision_score
 from matplotlib import pyplot as plt
+import colorsys
+
+
+color_id =  {}
 
 # Malisiewicz et al.
 def non_max_suppression_fast(boxes, overlapThresh):
@@ -54,6 +58,12 @@ def non_max_suppression_fast(boxes, overlapThresh):
 	# return only the bounding boxes that were picked using the
 	# integer data type
 	return pick #boxes[pick].astype("int")
+
+def get_random_col():
+    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
+    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
+    return (b, g, r)
+
 
 def fix_zero_idx(path):
 
@@ -171,10 +181,14 @@ def get_optimal_font_scale(text, width):
     return 1
 
 
-def pretty_rects(im, objs, name, color, conf_thresh=0.0):
+def pretty_rects(im, objs, name, color, conf_thresh=0.0, tracking = False):
     for obj in objs:
         if float(obj["conf"]) < conf_thresh:
             continue
+        if tracking:
+            if str(obj['id']) not in color_id:
+                color_id[str(obj['id'])] = get_random_col()
+            color = color_id[str(obj['id'])]
 
         bb = obj['bbox']
         h = bb[3] - bb[1]
