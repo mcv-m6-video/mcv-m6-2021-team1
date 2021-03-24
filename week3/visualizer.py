@@ -30,6 +30,12 @@ import matplotlib.pyplot as plt
 import utils
 import detection
 
+from pygifsicle import optimize
+
+USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn']
+USE_DET = ['gt', 'retina101']
+
+
 TOTAL_FRAMES = 2141
 VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
 GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
@@ -37,7 +43,7 @@ AI_GT_RECTS_PATH = "../../data/AICity_data/train/S03/c010/gt/gt.txt"
 OUT_DIR = 'out_visualizer'
 
 AP_thresh = 0.5
-conf_thresh = 0.5
+conf_thresh = 0.
 
 def gif_preprocess(im, width=512):
     im = utils.resize_keep_ap(im, width=width)
@@ -59,17 +65,23 @@ detections = [
         'color': (0, 255, 0),
         'rects': utils.parse_xml_rects(GT_RECTS_PATH)
     },
-    # {
-    #     'name': 'aigt',
-    #     'full-name': 'AI City GT',
-    #     'color': (0, 0, 255),
-    #     'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
-    # },
     {
-        'name': 'retina 50',
+        'name': 'aigt',
+        'full-name': 'AI City GT',
+        'color': (0, 0, 255),
+        'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
+    },
+    {
+        'name': 'retina50',
         'full-name': 'Retina Net R50 FPN 3x rp 128',
         'color': get_random_col(),
         'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
+    },
+    {
+        'name': 'retina101',
+        'full-name': 'Retina Net R191 FPN 3x rp 128',
+        'color': get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/retina101.txt', zero_index=0)
     },
     {
         'name': 'yolo',
@@ -83,7 +95,7 @@ detections = [
         'color': get_random_col(),
         'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
     },
-        {
+    {
         'name': 'rcnn',
         'full-name': 'Mask RCNN',
         'color': get_random_col(),
@@ -91,6 +103,7 @@ detections = [
     },
 
 ]
+
 
 def main(display=True):
 
@@ -117,6 +130,8 @@ def main(display=True):
     while(ret):
         # Render detections
         for det in detections:
+            if det['name'] not in USE_DET:
+                continue
             frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'], conf_thresh=conf_thresh)
  
         if display:
@@ -135,6 +150,8 @@ def main(display=True):
                 utils.get_optimal_font_scale(info, w*0.1), (0, 0, 255), 2)
 
             for det in detections:
+                if det['name'] not in USE_DET:
+                    continue
                 y += 25
                 frame = cv2.putText(frame, det['full-name'], (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
                     utils.get_optimal_font_scale(info, w*0.1), det['color'], 2)
@@ -177,6 +194,7 @@ def main(display=True):
         for path, buffer in gifs_to_save.items():
             print(path, '...')
             imageio.mimsave(path, buffer)
+            optimize(path)
 
     # Compute APs
     with open(os.path.join(out_dir, 'AP_results.txt'), 'a') as fp:
@@ -184,6 +202,8 @@ def main(display=True):
         fp.write(f'AP {AP_thresh}\n')
         gt = detections[0]['rects']
         for det in detections[1:]:
+            if det['name'] not in USE_DET:
+                continue
             AP = utils.get_AP(gt, det['rects'], ovthresh=AP_thresh)
             fp.write(f'{det["full-name"]}: {AP}\n')
 
