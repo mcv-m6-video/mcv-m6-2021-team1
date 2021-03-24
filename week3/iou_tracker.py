@@ -65,7 +65,7 @@ def decrease_memory():
 
 def main():
 
-    det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', 0)
+    det_rects = utils.parse_aicity_rects('m6-aicity_retinanet_R_50_FPN_3x_rp128.txt')
     
     order = sorted(det_rects, key=lambda x: int(x[2:]) )
     for f in order:
@@ -79,5 +79,4 @@ def main():
     print(len(tracked_object_dic))
 
 if __name__ == '__main__':
-
    main()

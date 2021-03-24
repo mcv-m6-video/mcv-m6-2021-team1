@@ -18,8 +18,6 @@ Input data:
                 }
 """
 import os
-import random
-import colorsys
 import datetime as dt
 import cv2
 import imageio
@@ -36,6 +34,7 @@ GT_RECTS_PATH = "../../data/ai_challenge_s03_c010-full_annotation.xml"
 AI_GT_RECTS_PATH = "../../data/AICity_data/train/S03/c010/gt/gt.txt"
 OUT_DIR = 'out_visualizer'
 
+tracking = True
 AP_thresh = 0.5
 conf_thresh = 0.4
 
@@ -44,49 +43,44 @@ def gif_preprocess(im, width=512):
     im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
 
-
-def get_random_col():
-    h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0
-    r,g,b = [int(256*i) for i in colorsys.hls_to_rgb(h,l,s)]
-    return (b, g, r)
-
 # Load detections
 print('Loading detections...')
 detections = [
-    {
-        'name': 'gt',
-        'full-name': 'Ground truth',
-        'color': (0, 255, 0),
-        'rects': utils.parse_xml_rects(GT_RECTS_PATH)
-    },
+    # {
+    #     'name': 'gt',
+    #     'full-name': 'Ground truth',
+    #     'color': (0, 255, 0),
+    #     'rects': utils.parse_xml_rects(GT_RECTS_PATH)
+    # },
     {
         'name': 'IOU',
         'full-name': 'tracking_iou',
         'color': (0, 0, 255),
-        'rects': utils.parse_aicity_rects('test.txt', zero_index=0)
+        'rects': utils.parse_aicity_rects('test.txt'),
+        'tracking' : True
     },
     # {
     #     'name': 'retina 50',
     #     'full-name': 'Retina Net R50 FPN 3x rp 128',
-    #     'color': get_random_col(),
+    #     'color': utils.get_random_col(),
     #     'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
     # },
     # {
     #     'name': 'yolo',
     #     'full-name': 'YOLO',
-    #     'color': get_random_col(),
+    #     'color': utils.get_random_col(),
     #     'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt', zero_index=1)
     # },
     #     {
     #     'name': 'ssd',
     #     'full-name': 'single shot detection 512',
-    #     'color': get_random_col(),
+    #     'color': utils.get_random_col(),
     #     'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
     # },
     #     {
     #     'name': 'rcnn',
     #     'full-name': 'Mask RCNN',
-    #     'color': get_random_col(),
+    #     'color': utils.get_random_col(),
     #     'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
     # },
 
@@ -117,7 +111,8 @@ def main(display=True):
     while(ret):
         # Render detections
         for det in detections:
-            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'], conf_thresh=conf_thresh)
+            frame = utils.pretty_rects(frame, det['rects'].get(f'f_{frame_cont}', []), det['name'], det['color'],
+                conf_thresh=conf_thresh, tracking = det.get('tracking', False))
  
         if display:
 
