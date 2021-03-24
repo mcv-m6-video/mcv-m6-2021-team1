@@ -68,7 +68,8 @@ We have created a script for showing the video with our results, be it detection
         # ...
     ]
 ```
-We already provide the base detections and tracked detections we used available inside week3/detections/ and week3/trackings_iou/ respectively
+We already provide the base and tracked detections we used inside *week3/detections/* and *week3/trackings_iou/* respectively
+
 > We assume the first detection on the list corresponds to ground truth data.
 
 - name: Name displayed on the bounding box on the visualizer
@@ -95,9 +96,9 @@ USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+I
 - s: Saves an snapshot to your current directory with the name save_{frame_number}.jpg
 - g: Toggles **gif recording**. Once you press g, the recording starts, until you press g again. You have to press g before the video ends, otherwise the gif won't ne generated. You can create multiple gifs, just be patient after you press q or the video ends while they are generated. Gifs are saved to *out_visualizer/{run}/gifs/*.
 
-> you can check if you are recording or not together with FPS information on the bottom right corner of the video
+> You can check if you are recording or not (together with FPS information) on the bottom right corner of the video
 
-> Note a new folder is generated inside out_visualizer on each execution of the program.
+> A new folder is generated inside *out_visualizer* on each execution of the program.
 
 ## Tracking
 ### 2.1 . IOU Tracking
