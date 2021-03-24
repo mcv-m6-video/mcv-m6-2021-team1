@@ -100,6 +100,15 @@ USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+I
 
 > A new folder is generated inside *out_visualizer* on each execution of the program.
 
+## Off the shelf models
+
+For obtaining detections apart from the provided ones for Yolo, SSD and Mask RCNN, we have used **detectron2**. The script *week3/m6-inference.py* generates txt outputs for the specified models and configurations. Two list of variables are currently being iterated over:
+
+- models: which holds the name of .yaml files from Detectron's [model zoo](https://github.com/facebookresearch/detectron2/blob/master/MODEL_ZOO.md)
+- batch: a list of integers with the number of region proposals used by the model (currently hardcoded).
+
+A txt file named 'm6-aicity_{model}_rp{batch}.txt' is generated.
+
 ## Tracking
 ### 2.1 . IOU Tracking
 
