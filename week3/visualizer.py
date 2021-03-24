@@ -30,9 +30,7 @@ import detection
 
 from pygifsicle import optimize
 
-USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn']
-USE_DET = ['gt', 'retina101']
-
+USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+IoU']
 
 TOTAL_FRAMES = 2141
 VIDEO_PATH = "../../data/AICity_data/train/S03/c010/vdo.avi"
@@ -52,55 +50,20 @@ def gif_preprocess(im, width=512):
 # Load detections
 print('Loading detections...')
 detections = [
+    {
+        'name': 'R101+IoU',
+        'full-name': 'Retina Net R1o1 FPN 3x rp 128 + IoU tracking',
+        'color': utils.get_random_col(),
+        'rects': utils.parse_aicity_rects('./detections/retina101_track.txt', zero_index=0),
+        'tracking': True
+    },
     # {
-    #     'name': 'gt',
-    #     'full-name': 'Ground truth',
-    #     'color': (0, 255, 0),
-    #     'rects': utils.parse_xml_rects(GT_RECTS_PATH)
+    #     'name': 'IOU',
+    #     'full-name': 'tracking_iou',
+    #     'color': (0, 0, 255),
+    #     'rects': utils.parse_aicity_rects('test.txt'),
+    #     'tracking' : True
     # },
-    {
-        'name': 'aigt',
-        'full-name': 'AI City GT',
-        'color': (0, 0, 255),
-        'rects': utils.parse_aicity_rects(AI_GT_RECTS_PATH)
-    },
-    {
-        'name': 'retina50',
-        'full-name': 'Retina Net R50 FPN 3x rp 128',
-        'color': get_random_col(),
-        'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
-    },
-    {
-        'name': 'retina101',
-        'full-name': 'Retina Net R191 FPN 3x rp 128',
-        'color': get_random_col(),
-        'rects': utils.parse_aicity_rects('./detections/retina101.txt', zero_index=0)
-    },
-    {
-        'name': 'yolo',
-        'full-name': 'YOLO',
-        'color': get_random_col(),
-        'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt', zero_index=1)
-    },
-        {
-        'name': 'ssd',
-        'full-name': 'single shot detection 512',
-        'color': get_random_col(),
-        'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
-    },
-    {
-        'name': 'rcnn',
-        'full-name': 'Mask RCNN',
-        'color': get_random_col(),
-        'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
-    },
-    {
-        'name': 'IOU',
-        'full-name': 'tracking_iou',
-        'color': (0, 0, 255),
-        'rects': utils.parse_aicity_rects('test.txt'),
-        'tracking' : True
-    },
     # {
     #     'name': 'retina 50',
     #     'full-name': 'Retina Net R50 FPN 3x rp 128',
@@ -108,22 +71,28 @@ detections = [
     #     'rects': utils.parse_aicity_rects('./detections/m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', zero_index=0)
     # },
     # {
+    #     'name': 'retina 101',
+    #     'full-name': 'Retina Net R101 FPN 3x rp 128',
+    #     'color': utils.get_random_col(),
+    #     'rects': utils.parse_aicity_rects('./detections/retina101.txt')
+    # },
+    # {
     #     'name': 'yolo',
     #     'full-name': 'YOLO',
     #     'color': utils.get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt', zero_index=1)
+    #     'rects': utils.parse_aicity_rects('./detections/det_yolo3.txt')
     # },
     #     {
     #     'name': 'ssd',
     #     'full-name': 'single shot detection 512',
     #     'color': utils.get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt', zero_index=1)
+    #     'rects': utils.parse_aicity_rects('./detections/det_ssd512.txt')
     # },
     #     {
     #     'name': 'rcnn',
     #     'full-name': 'Mask RCNN',
     #     'color': utils.get_random_col(),
-    #     'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
+    #     'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt')
     # },
 
 ]
