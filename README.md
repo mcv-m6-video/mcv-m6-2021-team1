@@ -109,6 +109,11 @@ For obtaining detections apart from the provided ones for Yolo, SSD and Mask RCN
 
 A txt file named 'm6-aicity_{model}_rp{batch}.txt' is generated.
 
+## Fine-Tuning Your Models
+The training scripts for the Faster-RCNN and Retinet are available in `train_faster_RCNN.py` and `train_retinaNet.py` respectively. Only the path to the dataset need to be provided to run a training session.
+
+Training with video files is not starightforward in Detectron2 so all the frames of the video had to be split and stored as individual jpg files. This can be done using the file `split_video.py`. 
+
 ## Tracking
 ### 2.1 . IOU Tracking
 
