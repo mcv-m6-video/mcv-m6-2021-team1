@@ -1,0 +1,12 @@
+torch==1.7.1
+torchvision==0.8.2
+numpy==1.19.5
+opencv-python==4.5.1.48 
+pandas==1.1.5
+matplotlib==3.3.4
+seaborn==0.11.0
+scikit-image==0.18.1
+motmetrics
+pygifsicle
+imageio
+# Detectron2: Find installation instructions for your system on the official github

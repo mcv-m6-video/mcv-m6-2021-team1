@@ -51,6 +51,13 @@ def gif_preprocess(im, width=512):
 print('Loading detections...')
 detections = [
     {
+        'name': 'gt',
+        'full-name': 'Ground truth',
+        'color': (0, 255, 0),
+        'rects': utils.parse_xml_rects(GT_RECTS_PATH),
+        'tracking': True
+    },
+    {
         'name': 'R101+IoU',
         'full-name': 'Retina Net R1o1 FPN 3x rp 128 + IoU tracking',
         'color': utils.get_random_col(),
