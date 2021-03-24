@@ -75,7 +75,7 @@ def main():
             # print(det)
         decrease_memory()
         # print('NEW FRAME:', len(tracked_object_dic))
-    utils.save_aicity_rects('test.txt', det_rects)
+    utils.save_aicity_rects('track_m6-aicity_retinanet_R_50_FPN_3x_rp128.txt', det_rects)
     print(len(tracked_object_dic))
 
 if __name__ == '__main__':
