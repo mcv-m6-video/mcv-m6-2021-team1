@@ -101,6 +101,12 @@ detections = [
         'color': get_random_col(),
         'rects': utils.parse_aicity_rects('./detections/det_mask_rcnn.txt', zero_index=1)
     },
+    {
+        'name': 'IOU',
+        'full-name': 'tracking_iou',
+        'color': (0, 0, 255),
+        'rects': utils.parse_aicity_rects('test.txt', zero_index=0)
+    }
 
 ]
 

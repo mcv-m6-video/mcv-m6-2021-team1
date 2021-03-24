@@ -2,6 +2,29 @@
 import numpy as np
 import cv2
 from random import randint
+import pandas as pd
+
+def save_aicity_rects(path, det_rects):
+
+    COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
+    dic_csv = {
+        'frame' : [], 'id': [], 'bb_left': [], 'bb_top': [], 'bb_width': [], 'bb_height': [], 'conf': [], 'x': [], 'y': [], 'z': []
+    }
+    for f in det_rects:
+        for det in det_rects[f]:
+            dic_csv['frame'].append(f[2:])
+            dic_csv['id'].append(det['id'])
+            dic_csv['bb_left'].append(det['bbox'][0])
+            dic_csv['bb_top'].append(det['bbox'][1])
+            dic_csv['bb_width'].append(det['bbox'][2]-det['bbox'][0])
+            dic_csv['bb_height'].append(det['bbox'][3]-det['bbox'][1])
+            dic_csv['conf'].append(det['conf'])
+            dic_csv['x'].append(-1)
+            dic_csv['y'].append(-1)
+            dic_csv['z'].append(-1)
+
+    df = pd.DataFrame(dic_csv, columns=COL_NAMES)
+    df.to_csv(path, index = False, header=False)
 
 
 def compute_intersection_over_union(boxA, boxB):
