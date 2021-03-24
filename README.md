@@ -152,7 +152,7 @@ The txt file with the results will be stored for posterior evaluation. A video w
 
 
 ### 2.3. IDF1 computation
-IDF is computed using the script *weeek3/test_metric.py* as follows:
+IDF is computed using the pymotmetrics-based script *weeek3/test_metric.py* as follows:
 
 ```
 python3 test_metric.py <GT_FOLDER> <DET_FOLDER>
