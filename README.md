@@ -105,7 +105,7 @@ USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+I
 
 IOU tracking is performed using the script *iou_tracker.py*. Input is a txt file following the described format representing a detection. An output following the same format, but now holding id information. Both input and output paths must be specified inside *iou_tracker.py*'s main.
 
-## 2.2. Kalman tracking + state-of-the-art trackers
+### 2.2. Kalman tracking + state-of-the-art trackers
 All trackers were implemented under the same architecture so they can be easily run and tested using the file:
 ````
 $ python w3_run_kalman.py -h
