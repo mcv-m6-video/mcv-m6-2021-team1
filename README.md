@@ -60,6 +60,7 @@ We have created a script for showing the video with our results, be it detection
         # ...
     ]
 ```
+We already provide the base detections and tracked detections we used available inside week3/detections/ and week3/trackings_iou/ respectively
 > We assume the first detection on the list corresponds to ground truth data.
 
 - name: Name displayed on the bounding box on the visualizer
@@ -90,6 +91,31 @@ USE_DET = ['gt', 'aigt', 'yolo', 'ssd', 'retina50', 'retina101', 'rcnn', 'R101+I
 
 > Note a new folder is generated inside out_visualizer on each execution of the program.
 
+## Tracking
+## IOU
+
+IOU tracking is performed using the script *iou_tracker.py*. Input is a txt file following the described format representing a detection. An output following the same format, but now holding id information. Both input and output paths must be specified inside *iou_tracker.py*'s main.
+
+### IDF1 computation
+IDF is computed using the script *weeek3/test_metric.py* as follows:
+
+```
+python3 test_metric.py <GT_FOLDER> <DET_FOLDER>
+```
+GT_FOLDER and DET_FOLDER hold txt files with ground truth and detection data respectively. They must have the following structure:
+
+```
+Layout for ground truth data
+    <GT_FOLDER>/<SEQUENCE_1>/gt/gt.txt
+    <GT_FOLDER>/<SEQUENCE_2>/gt/gt.txt
+    ...
+
+Layout for test data
+    <DET_FOLDER>/<SEQUENCE_1>.txt
+    <DET_FOLDER>/<SEQUENCE_2>.txt
+    ...
+```
+Ground truth and detection is matched according to SEQUENCE_X
 
 # <a name="w1"></a> Week 2
 
