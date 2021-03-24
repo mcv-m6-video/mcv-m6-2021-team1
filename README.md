@@ -68,7 +68,8 @@ We have created a script for showing the video with our results, be it detection
         # ...
     ]
 ```
-We already provide the base detections and tracked detections we used available inside week3/detections/ and week3/trackings_iou/ respectively
+We already provide the base and tracked detections we used inside *week3/detections/* and *week3/trackings_iou/* respectively
+
 > We assume the first detection on the list corresponds to ground truth data.
 
 - name: Name displayed on the bounding box on the visualizer
