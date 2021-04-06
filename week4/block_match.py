@@ -25,8 +25,26 @@ def exhaustive_search(template:np.ndarray, target:np.ndarray, metric='cv2.TM_CCO
         pos = max_loc
     return pos
 
-def logarithmic_search(template:np.ndarray, target:np.ndarray, metric:str='cv2.TM_CCORR_NORMED'):
-    pass
+def logarithmic_search(template:np.ndarray, target:np.ndarray, metric:str='cv2.TM_SQDIFF_NORMED'):
+    step=8
+    orig = ((target.shape[0]-template.shape[0])//2, (target.shape[1]-template.shape[1])//2)
+    step = (min(step, orig[0]), min(step, orig[1]))
+    while step[0] > 1 and step[1] > 1:
+        min_dist = np.inf
+        pos = orig
+        for i in [orig[0]-step[0], orig[0], orig[0]+step[0]]:
+            for j in [orig[1]-step[1], orig[1], orig[1]+step[1]]:
+                
+                def _distance(x1,x2):
+                    return np.mean((x1 - x2) ** 2)
+                
+                dist = _distance(template, target[i:i + template.shape[0], j:j + template.shape[1]])
+                if dist < min_dist:
+                    pos = (i, j)
+                    min_dist = dist
+        orig = pos
+        step = (step[0]//2, step[1]//2)
+    return orig
 
 def find_template(template:np.ndarray, target:np.ndarray, search='exhaustive', metric='cv2.TM_CCORR_NORMED'):
 
