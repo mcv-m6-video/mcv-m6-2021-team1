@@ -1,4 +1,5 @@
 import os
+import argparse
 import cv2
 import numpy as np
 import block_match as bm
@@ -50,7 +51,7 @@ def apply_flow(img, flow, kernel_type='gaussian', kernel_size=11, memory=20, use
 
         current_angle = np.average(angles, weights=None)
         prev_r_list.append(current_angle)
-        if len(prev_r_list) > MEMORY:
+        if len(prev_r_list) > memory:
             prev_r_list.pop(0)
 
         angle = -np.sum(prev_r_list)
@@ -100,8 +101,8 @@ def paint_grid(im):
     im = cv2.line(im, (2*im.shape[1]//3, 0), (2*im.shape[1]//3, im.shape[0]), (0,0,255))
     return im
 
-def main(videoname, kernel_type, kernel_size, memory, use_angle):
-    cap = cv2.VideoCapture(cv2.samples.findFile(f'../../{VIDEO}.avi'))
+def main(videoname, kernel_type, kernel_size, memory, use_angle, display):
+    cap = cv2.VideoCapture(cv2.samples.findFile(f'../../{videoname}.avi'))
     ret, frame1 = cap.read()
 
     prvs = cv2.cvtColor(frame1,cv2.COLOR_BGR2GRAY)
@@ -131,7 +132,7 @@ def main(videoname, kernel_type, kernel_size, memory, use_angle):
         out = paint_grid(out)
 
         # cv2.imshow('flow',bgr)
-        if DISPLAY:
+        if display:
             cv2.imshow('input',frame2)
             cv2.imshow('out',out)
 
@@ -157,17 +158,26 @@ def main(videoname, kernel_type, kernel_size, memory, use_angle):
     output.release()
 
     print('Input...')
-    output = cv2.VideoWriter(f'output/in_{VIDEO}.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, out.shape[:2])
+    output = cv2.VideoWriter(f'output/in_{videoname}.avi', cv2.VideoWriter_fourcc(*'XVID'), 30, out.shape[:2])
     for f in in_frames:
         output.write(f)
     output.release()
 
 if __name__== '__main__':
-    TYPE = 'gaussian'
-    KERNEL_SIZE = 11
-    VIDEO = 'pc'
-    DISPLAY = True
-    MEMORY = 20
-    USE_ANGLE = False
+    parser = argparse.ArgumentParser()
+    parser.add_argument('-v', '--video', type=str, required=True, 
+        help='Name of the video to stabilize. Must be an avi store in ../..')
+    parser.add_argument('-t', '--kernel-type', type=str, choices = ['median', 'gaussian'],
+        default='gaussian', required=False, help='Type of smoothing filter')
+    parser.add_argument('-s', '--kernel-size', type=int, required=False, default=11,
+        help='Size of the smoothing kernel')
+    parser.add_argument('-d', '--display', action='store_true', default=False,
+        help='Wheter to display frames s they are being processed or not')
+    parser.add_argument('-a', '--angle', action='store_true', default=False,
+        help='Wheter to try to compensate angles (not recommended)')
+    parser.add_argument('-m', '--memory', type=int, required=False, default=20,
+        help='Size of the accumulated memory')
+    args = parser.parse_args()
 
-    main(VIDEO, TYPE, KERNEL_SIZE, MEMORY, USE_ANGLE)
+
+    main(args.video, args.kernel_type, args.kernel_size, args.memory, args.angle, args.display)
