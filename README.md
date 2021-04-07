@@ -21,8 +21,17 @@ The code for generating the visualizations in the slides is provided in `visuali
 
 ### 1.2. Off-the-shelf Optical Flow
 
+The followin algorithm have been tested:
+   -PyFlow 
+   -Lucas-Kanade
+   -Farneback
+   -SimpleFlow
+   
+ The scripts to perform optical flow are in week4/opticalflow/pyflow. If you run any of them, you get running time, MSE, PEPN on the terminal and the optical flow representation is displayed. 
+ 
+
 ### 2.1. Video Stabilization with Block Matching
-The algorithm for video stabilization is based on a simple traslational model. To stabilize s video, call week4/stabilization.py with the following arguments:
+The algorithm for video stabilization is based on a simple traslational model. To stabilize a video, call week4/stabilization.py with the following arguments:
 ```
 usage: stabilization.py [-h] -v VIDEO [-t {median,gaussian}] [-s KERNEL_SIZE] [-d] [-a] [-m MEMORY]
 
@@ -45,6 +54,25 @@ outname = f'output/out{videoname}_mem{memory}_typ{kernel_type}_ker{kernel_size}_
 ```
 
 ### 2.2. Off-the-shelf Video Stabilization
+
+ The following algorithms have been tested:
+   -VidStab (script in week4/vidstab/vidstab_script.py): input and output video path are hardcoded. This script also plots trajectory and transform graphs.
+   ```
+$ python vidstab_script.py
+   
+   ```
+   -Video Stabilization Using Point Feature Matching in OpenCV (script in week4/vidstab/VideoStabilization/video_stabilization.py): input and output video path are hardcoded.
+   
+ ```
+$ python video_stabilization.py
+ ```
+   
+ We also attempted:
+   - [Futsa](https://alex04072000.github.io/FuSta/)
+   - [Real-Time-Video-Stabilization](https://github.com/Lakshya-Kejriwal/Real-Time-Video-Stabilization)
+  
+ But ultimately, we did not manage to make them work correctly.
+
 
 ### 3.1. Tracking with optical flow
 The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
