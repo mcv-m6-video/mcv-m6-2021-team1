@@ -11,6 +11,34 @@
 
 # Week 4
 
+### 3.1. Tracking with optical flow
+The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
+````
+$ python w3_run_kalman.py -h
+usage    w3_run_kalman.py [-h] [-o OUTPUT] [-d DETECTIONS] [-t TRACKER]
+                        [-th THRESHOLD] [-tl TRACKER_LIFE] [-M MAX]
+
+optional arguments:optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -d DETECTIONS, --detections DETECTIONS
+                        detections used for tracking. Options: {retinanetpre, retinanet101pre, maskrcnnpre, ssdpre, yolopre}
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean", "medianflow"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life
+  -m MIN, --min MIN     number of frame to start the tracker (by default it runs from the beginning of the video).
+                        Set to '-1' by default.
+  -M MAX, --max MAX     number of frames to finish the tracking (by default it runs until the end of the video).
+                        Set to '-1' by default.
+
+````
+
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
+
 # <a name="w3"></a> Week 3
 
 ## Requirements
