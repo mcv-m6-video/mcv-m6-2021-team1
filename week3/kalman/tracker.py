@@ -111,9 +111,9 @@ class TracksManager:
 
                     # Tracked object was found! => reset with the detection box (which should be more accurate)
                     if self.tracker_type == "kalman":
-                        self.trackers[track_id].update_state(det_bbox)
+                        self.trackers[track_id].update_state(frame, det_bbox)
                         self.__found_tracker(track_id) # we do not reset it for performance issues
-                    elif self.tracker_type in ["iou", "kcf", "csrt"] or 1 - iou_matrix[det_index][tr_index] < 0.85:
+                    elif "siam" not in self.tracker_type.lower() or 1 - iou_matrix[det_index][tr_index] < 0.85:
                         self.__reset_tracker(frame, track_id, det_bbox)
                     else:
                         self.__found_tracker(track_id) # we do not reset it for performance issues

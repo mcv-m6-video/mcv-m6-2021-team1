@@ -70,7 +70,7 @@ class KalmanTracker:
         self.history.append(predicted)
         return True, predicted[0]
 
-    def update_state(self, bbox):
+    def update_state(self, frame, bbox):
         xywh = [bbox[0], bbox[1], bbox[2]-bbox[0], bbox[3]-bbox[1]]
         self.history = []
         new_bbox = convert_bbox_to_z(xywh)

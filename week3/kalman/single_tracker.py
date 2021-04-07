@@ -8,6 +8,7 @@ from pysot.tracker.tracker_builder import build_tracker
 from pysot.utils.model_load import load_pretrain
 from week3.kalman.static_tracker import StaticTracker
 from week3.kalman.kalman_tracker import KalmanTracker
+from week4.tracking.flow_tracker import LKFlowTracker, GFFlowTracker
 import torch
 import cv2
 
@@ -16,6 +17,7 @@ OPENCV_TRACKERS = {
     # OpenCV trackers
     "kcf":          cv2.TrackerKCF_create,
     "csrt":         cv2.TrackerCSRT_create,
+    "medianflow":   cv2.TrackerMedianFlow_create,
 }
 
 PYSOT_TRACKERS = {
@@ -55,6 +57,14 @@ class SingleTracker:
             self.tracker = build_tracker(load_pysot_model(self.type))
         elif tr == "kalman":
             self.tracker = KalmanTracker()
+        elif tr == "flow_LK_mean":
+            self.tracker = LKFlowTracker(strategy="mean")
+        elif tr == "flow_LK_median":
+            self.tracker = LKFlowTracker(strategy="median")
+        elif tr == "flow_GF_mean":
+            self.tracker = GFFlowTracker(strategy="mean")
+        elif tr == "flow_GF_median":
+            self.tracker = GFFlowTracker(strategy="median")
         elif tr == "iou":
             self.tracker = StaticTracker()
         else:
@@ -80,6 +90,6 @@ class SingleTracker:
             (success, (x, y, w, h)) = self.tracker.update(frame)
         return success, (x, y, x + w, y + h)
 
-    def update_state(self, bbox):
-        if self.type == "kalman":
-            self.tracker.update_state(bbox)
+    def update_state(self, frame, bbox):
+        if self.type == "kalman" or self.type == "flow_LK" or self.type == "flow_GF":
+            self.tracker.update_state(frame, bbox)
