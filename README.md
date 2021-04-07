@@ -11,7 +11,9 @@
 
 # Week 4
 
-1. The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
+### 1.1 Compute optical flow
+
+The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
    - exhaustive search
    - three step search
 
