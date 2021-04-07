@@ -11,14 +11,12 @@
 
 # Week 4
 
-<<<<<<< HEAD
 1. The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
    - exhaustive search
    - three step search
 
 The code for generating the visualizations in the slides is provided in `visualize_block_matching.py`
 
-=======
 ### 3.1. Tracking with optical flow
 The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
 ````
@@ -46,7 +44,6 @@ optional arguments:optional arguments:
 ````
 
 The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
->>>>>>> b0745e74d7bc7875b5642b1c4e5e99e9ba72e6eb
 
 # <a name="w3"></a> Week 3
 
