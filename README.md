@@ -19,6 +19,33 @@ The implementation and sample usage of block matching optical flow can is provid
 
 The code for generating the visualizations in the slides is provided in `visualize_block_matching.py`
 
+### 1.2. Off-the-shelf Optical Flow
+
+### 2.1. Video Stabilization with Block Matching
+The algorithm for video stabilization is based on a simple traslational model. To stabilize s video, call week4/stabilization.py with the following arguments:
+```
+usage: stabilization.py [-h] -v VIDEO [-t {median,gaussian}] [-s KERNEL_SIZE] [-d] [-a] [-m MEMORY]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VIDEO, --video VIDEO
+                        Name of the video to stabilize. Must be an avi store in ../..
+  -t {median,gaussian}, --kernel-type {median,gaussian}
+                        Type of smoothing filter
+  -s KERNEL_SIZE, --kernel-size KERNEL_SIZE
+                        Size of the smoothing kernel
+  -d, --display         Wheter to display frames s they are being processed or not
+  -a, --angle           Wheter to try to compensate angles (not recommended)
+  -m MEMORY, --memory MEMORY
+                        Size of the accumulated memory
+```
+An output video will be generated on output/ with the following naming convention:
+```python
+outname = f'output/out{videoname}_mem{memory}_typ{kernel_type}_ker{kernel_size}_angle_{use_angle}.avi'
+```
+
+### 2.2. Off-the-shelf Video Stabilization
+
 ### 3.1. Tracking with optical flow
 The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
 ````
