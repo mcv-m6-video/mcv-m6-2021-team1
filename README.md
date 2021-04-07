@@ -11,6 +11,13 @@
 
 # Week 4
 
+1. The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
+   - exhaustive search
+   - three step search
+
+The code for generating the visualizations in the slides is provided in `visualize_block_matching.py`
+
+
 # <a name="w3"></a> Week 3
 
 ## Requirements
