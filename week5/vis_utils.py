@@ -13,6 +13,9 @@ DATA_PATH = '/home/jchaves/code/temp/m6data/'
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 
+dets2use = ['mask_rcnn', 'yolo']
+tracks2use = ['mtsc_deepsort_mask_rcnn']
+
 class MOTCamera():
     """
     Object representing a camera in the MOTSChallenge format
@@ -23,9 +26,9 @@ class MOTCamera():
 
         self.gt = w3utils.parse_aicity_rects(os.path.join(path, 'gt', 'gt.txt'))
         self.detections = { k[4:-4]: w3utils.parse_aicity_rects(os.path.join(path, 'det', k))
-            for k in os.listdir(os.path.join(path, 'det')) if '.txt' in k}
+            for k in os.listdir(os.path.join(path, 'det')) if '.txt' in k and any(t in k for t in dets2use)}
         self.trackings = { k[5:-4]: w3utils.parse_aicity_rects(os.path.join(path, 'mtsc', k))
-            for k in os.listdir(os.path.join(path, 'mtsc')) if '.txt' in k}
+            for k in os.listdir(os.path.join(path, 'mtsc')) if '.txt' in k and any(t in k for t in tracks2use)}
         self.num_frames = 0
         self.videopath = os.path.join(path, 'vdo.avi')
         self.roi = cv2.imread(os.path.join(path, 'roi.jpg'))
@@ -44,6 +47,9 @@ class MOTCamera():
 
     def close_vid(self):
         self.cap.release()
+
+    def __del__(self):
+        self.close_vid()
 
 
 class MOTSequence():
@@ -91,6 +97,10 @@ class MOTSequence():
             v = cv2.resize(v, tuple(np.int0(0.5*np.array(v.shape[:2][::-1]))))
             cv2.imshow(k, v)
         return cv2.waitKey(0)
+    
+    def __del__(self):
+        for _,c in self.cams().items():
+            del c
 
 
 s = MOTSequence(1)
