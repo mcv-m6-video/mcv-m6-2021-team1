@@ -13,14 +13,14 @@ DATA_PATH = '/home/jchaves/code/temp/m6data/'
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 
-dets2use = ['mask_rcnn', 'yolo']
+dets2use = ['mask_rcnn']
 tracks2use = ['mtsc_deepsort_mask_rcnn']
 
 class MOTCamera():
     """
     Object representing a camera in the MOTSChallenge format
     """
-    def __init__(self, path):
+    def __init__(self, path, det='mask_rcnn', track='deepsort_mask_rcnn'):
         self.cam_name = os.path.split(path)[-1]
         print(f'\tCreating object for camera {self.cam_name}...')
 
@@ -33,7 +33,9 @@ class MOTCamera():
         self.videopath = os.path.join(path, 'vdo.avi')
         self.roi = cv2.imread(os.path.join(path, 'roi.jpg'))
         self.FPS = 10 if 'c015' not in path else 8
-        # self.cap = cv2.VideoCapture(self.videopath)
+        
+        self.det = det
+        self.track = track
 
     def init_capture(self):
         print(f'\tInitializing capture for camera {self.cam_name}...')
@@ -43,23 +45,36 @@ class MOTCamera():
     def get_frame(self):
         print(f'\tGetting frame {self.frame_cont} frame for camera {self.cam_name}...')
         self.frame_cont += 1
-        return self.cap.read()
+        ret, frame =  self.cap.read()
+        frame = self._paint_rects(frame)
+        return ret, frame
 
-    def close_vid(self):
+    def _paint_rects(self, im):
+        # det = self.detections[self.det]
+        # det = self.trackings[self.track]
+        det = self.gt
+        frame = w3utils.pretty_rects(im, det.get(f'f_{self.frame_cont}', []), 'test', (0,255,0),
+                conf_thresh=0.7, tracking = det.get('tracking', False))
+        return im
+
+    def _close_vid(self):
         self.cap.release()
 
     def __del__(self):
-        self.close_vid()
+        self._close_vid()
 
 
 class MOTSequence():
     """
     Object representing a sequence in the MOTSChallenge format
     """
-    def __init__(self, seq_num):
+    def __init__(self, seq_num, cam_ids=[], det='mask_rcnn', track='deepsort_mask_rcnn'):
+        if not cam_ids:
+            cam_ids = list(range(1000)) # dirty ugly patch but whatever
+
         print(f'Creating object for sequence S{str(seq_num).zfill(2)}...')
         path = os.path.join(DATA_PATH, 'train', f'S{str(seq_num).zfill(2)}')
-        self.cams= {p: MOTCamera(os.path.join(path, p)) for p in os.listdir(path)}
+        self.cams= {p: MOTCamera(os.path.join(path, p), det=det, track=track) for p in os.listdir(path) if int(p[1:]) in cam_ids}
         self.num_cams = len(self.cams)
         self.timestamps = {}
         with open(os.path.join(TIMESTAMP_PATH, f'S{str(seq_num).zfill(2)}.txt'), 'r') as f:
@@ -99,11 +114,11 @@ class MOTSequence():
         return cv2.waitKey(0)
     
     def __del__(self):
-        for _,c in self.cams().items():
+        for _,c in self.cams.items():
             del c
 
 
-s = MOTSequence(1)
+s = MOTSequence(3, cam_ids=[10, 11, 12, 13, 14, 15])
 s.init_visualize()
 
 k = True
