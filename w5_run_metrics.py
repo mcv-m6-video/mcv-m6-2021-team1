@@ -22,6 +22,7 @@ from pathlib import Path
 import motmetrics as mm
 from week5.utils import get_GT_path, get_TRACKING_path
 
+VIDEOS_LIST = ((1, list(range(1,6))), (3, list(range(10,16))), (4, list(range(16,41))))
 
 def parse_args():
     """Defines and parses command-line arguments."""
@@ -54,8 +55,9 @@ Layout for test data
 Sequences of ground truth and test will be matched according to the `<SEQUENCE_X>`
 string.""", formatter_class=argparse.RawTextHelpFormatter)
 
-    parser.add_argument('-s', '--sequence', type=int, help="sequence")
-    parser.add_argument('-c', '--camera', type=int, help="camera")
+    parser.add_argument('-s', '--sequence', type=int, default=-1, help="sequence")
+    parser.add_argument('-c', '--camera', type=int, default=-1, help="camera")
+    parser.add_argument('-f', '--folder', type=str, default="../output_post", help="tracking folder")
     parser.add_argument('--loglevel', type=str, help='Log level', default='info')
     parser.add_argument('--fmt', type=str, help='Data format', default='mot15-2D')
     parser.add_argument('--solver', type=str, help='LAP solver to use for matching between frames.')
@@ -82,7 +84,7 @@ def compare_dataframes(gts, ts):
 def main(args, sequence, camera):
     # pylint: disable=missing-function-docstring
     GT_PATH = get_GT_path(sequence, camera).replace("gt/gt.txt", "")
-    TR_PATH = get_TRACKING_path(sequence, camera)
+    TR_PATH = get_TRACKING_path(sequence, camera, folder=args.folder)
     print(TR_PATH)
 
     loglevel = getattr(logging, args.loglevel.upper(), None)
@@ -126,4 +128,10 @@ if __name__ == '__main__':
     args = parse_args()
     sequence, camera = args.sequence, args.camera
 
-    main(args, sequence, camera)
+    if args.sequence != -1 and args.camera != -1:
+        main(args, sequence, camera)
+    else:
+        for (sequence, cameras) in VIDEOS_LIST:
+            for camera in cameras:
+                print(f"\n\n> S{sequence:02d}-C{camera:03d}")
+                main(args, sequence, camera)
