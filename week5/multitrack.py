@@ -30,68 +30,109 @@ def crop_bbox(cam, frame, bbox):
     cap_aux.release()
     return fr_im[bbox[1]:bbox[3], bbox[0]:bbox[2]]
 
-# def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
-
-#     query_data = [(query_cam, fr_query, dic_data[query_cam][query][fr_query]['bbox']) 
-#         for fr_query in dic_data[query_cam][query]]
-
-#     best_cand = -1
-#     best_cand_conf = 0
-#     for cand in candidates:
-#         cand_data = [(candidates_cam, fr_cand, dic_data[candidates_cam][cand][fr_cand]['bbox']) 
-#             for fr_cand in dic_data[candidates_cam][cand]]
-    
-#         if method = 
+def hist_rgb_match(query_data, cand_data):
 
 
-
-def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
-    #print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
-
-    fr_query = list(dic_data[query_cam][query].keys())[0]
-    bb_query = dic_data[query_cam][query][fr_query]['bbox']
-
-    query_im = crop_bbox(query_cam, fr_query, bb_query)
+    query_im = crop_bbox(*query_data[0])
+    cand_im = crop_bbox(*cand_data[0])
 
     # cv2.imshow('im_query', query_im)
+    # cv2.imshow(f'candidate', cand_im)
     # cv2.waitKey(0)
+
+    # print(np.vstack([cv2.calcHist([query_im],[i],None,[256],[0,256]) for i in range(3)]).shape)
+
+    H1 = np.vstack([cv2.calcHist([query_im],[i],None,[256],[0,256]) for i in range(3)])
+    H2 = np.vstack([cv2.calcHist([cand_im],[i],None,[256],[0,256]) for i in range(3)])
+
+    # plt.plot(H1,color = 'b')
+    # plt.plot(H2,color = 'r')
+
+    H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
+    H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
+
+    conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
+     
+    # plt.title(conf)
+    # plt.xlim([0,256*3])
+    # plt.show()
+
+    return conf
+
+def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
+    # print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
+
+    query_data = [(query_cam, fr_query, dic_data[query_cam][query][fr_query]['bbox']) 
+        for fr_query in dic_data[query_cam][query]]
 
     best_cand = -1
     best_cand_conf = 0
     for cand in candidates:
-
-        fr_cand = list(dic_data[candidates_cam][cand].keys())[0]
-        bb_cand = dic_data[candidates_cam][cand][fr_cand]['bbox']
-
-        cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
-
-        # cv2.imshow(f'candidate {cand}', cand_im)
-        # cv2.waitKey(0)
-        
-        H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
-        # plt.plot(H1,color = 'b')
-        H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
-        # plt.plot(H2,color = 'r')
-
-        #normalize hists
-        H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
-        H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
-
-        conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
-        # plt.title(conf)
-        # plt.xlim([0,256])
-        #plt.show()
+        # print('cand:', cand)
+        cand_data = [(candidates_cam, fr_cand, dic_data[candidates_cam][cand][fr_cand]['bbox']) 
+            for fr_cand in dic_data[candidates_cam][cand]]
+    
+        if method == 'hist_rgb':
+            conf = hist_rgb_match(query_data, cand_data)
+        elif method == 'hist_3d':
+            conf = hist_3d_match(query_data, cand_data)
+        else:
+            continue
 
         if conf>best_cand_conf:
             best_cand = cand
             best_cand_conf = conf
 
-    # if cv2.waitKey(0) == ord('q'):
-    #     quit()
-
     cv2.destroyAllWindows()
     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
     return best_cand, best_cand_conf
+        
+# def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
+    
+#     fr_query = list(dic_data[query_cam][query].keys())[0]
+#     bb_query = dic_data[query_cam][query][fr_query]['bbox']
+
+#     query_im = crop_bbox(query_cam, fr_query, bb_query)
+
+#     # cv2.imshow('im_query', query_im)
+#     # cv2.waitKey(0)
+
+#     best_cand = -1
+#     best_cand_conf = 0
+#     for cand in candidates:
+
+#         fr_cand = list(dic_data[candidates_cam][cand].keys())[0]
+#         bb_cand = dic_data[candidates_cam][cand][fr_cand]['bbox']
+
+#         cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
+
+#         # cv2.imshow(f'candidate {cand}', cand_im)
+#         # cv2.waitKey(0)
+        
+#         H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
+#         # plt.plot(H1,color = 'b')
+#         H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
+#         # plt.plot(H2,color = 'r')
+
+#         #normalize hists
+#         H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
+#         H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
+
+#         conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
+#         # plt.title(conf)
+#         # plt.xlim([0,256])
+#         #plt.show()
+
+#         if conf>best_cand_conf:
+#             best_cand = cand
+#             best_cand_conf = conf
+
+#     # if cv2.waitKey(0) == ord('q'):
+#     #     quit()
+
+#     cv2.destroyAllWindows()
+#     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
+#     return best_cand, best_cand_conf
 
 
 

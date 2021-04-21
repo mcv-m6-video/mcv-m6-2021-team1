@@ -48,12 +48,9 @@ while(cap.isOpened()):
                    
             cap_aux.release()
 
-
-
     fr_n += 1
     if cv2.waitKey(1) & 0xFF == ord('q'):
         break
-    
 
 cap.release()
 cv2.destroyAllWindows()
