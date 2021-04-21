@@ -7,7 +7,7 @@ import utils
 
 def match_tracks(query, query_cam, candidates, candidates_cam):
     print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
-    return -1, 1
+    return list(candidates)[0], 1
 
 ###CONGIF###
 
@@ -95,7 +95,7 @@ for cam in range(0, num_cams):
                         if obj_el['id'] == match and not(obj_el['mt_id'] != -1 and obj_el['mt_conf']>conf):
                             fr_aux = list(dic_tracks[cam][key_query].keys())[0]
 
-                            for ki, ei in dic_tracks_byframe[cam][f'f_{fr_aux}']:
+                            for ei in dic_tracks_byframe[cam][f'f_{fr_aux}']:
                                 if ei['id'] == key_query:
                                     obj_el['mt_id'] = ei['mt_id']
                             obj_el['mt_conf'] = conf
