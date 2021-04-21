@@ -12,7 +12,7 @@ def match_tracks(query, query_cam, candidates, candidates_cam):
 ###CONGIF###
 
 DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
-DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+# DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
 
 ############
@@ -102,5 +102,12 @@ for cam in range(0, num_cams):
                             obj_el['mt_conf'] = conf
 
 
+cam_names = []
+with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
+    for line in f:
+        cam_names.append(line.split()[0])
+
 for i, det in enumerate(dic_tracks_byframe):
-    utils.save_aicity_rects(f'mtmc_S{str(SEQ).zfill(2)}_c{str(i).zfill(3)}_random.txt', det, True)
+    os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(cam_names[i]).zfill(3)}',exist_ok=True)
+
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(cam_names[i]).zfill(3)}/random.txt', det, True)
