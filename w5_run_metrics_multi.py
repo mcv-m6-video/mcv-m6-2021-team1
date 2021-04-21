@@ -142,8 +142,7 @@ if __name__ == '__main__':
     args = parse_args()
     sequence, camera = args.sequence, args.camera
 
-    if args.sequence != -1 and args.camera != -1:
-        main(args, sequence, camera)
-    else:
-        for (sequence, cameras) in VIDEOS_LIST:
-            main(args, sequence, cameras)
+    for (sequence, cameras) in VIDEOS_LIST:
+        if args.sequence != -1 and args.sequence != sequence:
+            continue
+        main(args, sequence, cameras)
