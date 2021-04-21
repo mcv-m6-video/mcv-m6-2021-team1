@@ -10,6 +10,7 @@ from matplotlib import pyplot as plt
 DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
 # DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
+METHOD = 'hist_rgb'
 
 ############
 
@@ -29,16 +30,31 @@ def crop_bbox(cam, frame, bbox):
     cap_aux.release()
     return fr_im[bbox[1]:bbox[3], bbox[0]:bbox[2]]
 
-def match_tracks(query, query_cam, candidates, candidates_cam, dic_data):
-    print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
+# def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
+
+#     query_data = [(query_cam, fr_query, dic_data[query_cam][query][fr_query]['bbox']) 
+#         for fr_query in dic_data[query_cam][query]]
+
+#     best_cand = -1
+#     best_cand_conf = 0
+#     for cand in candidates:
+#         cand_data = [(candidates_cam, fr_cand, dic_data[candidates_cam][cand][fr_cand]['bbox']) 
+#             for fr_cand in dic_data[candidates_cam][cand]]
+    
+#         if method = 
+
+
+
+def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
+    #print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
 
     fr_query = list(dic_data[query_cam][query].keys())[0]
     bb_query = dic_data[query_cam][query][fr_query]['bbox']
 
     query_im = crop_bbox(query_cam, fr_query, bb_query)
 
-    cv2.imshow('im_query', query_im)
-    cv2.waitKey(0)
+    # cv2.imshow('im_query', query_im)
+    # cv2.waitKey(0)
 
     best_cand = -1
     best_cand_conf = 0
@@ -49,33 +65,34 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data):
 
         cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
 
-        cv2.imshow(f'candidate {cand}', cand_im)
-        cv2.waitKey(0)
+        # cv2.imshow(f'candidate {cand}', cand_im)
+        # cv2.waitKey(0)
         
         H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
-        plt.plot(H1,color = 'b')
+        # plt.plot(H1,color = 'b')
         H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
-        plt.plot(H2,color = 'r')
+        # plt.plot(H2,color = 'r')
 
         #normalize hists
         H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
         H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
 
         conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
-        plt.title(conf)
-        plt.xlim([0,256])
+        # plt.title(conf)
+        # plt.xlim([0,256])
         #plt.show()
 
         if conf>best_cand_conf:
             best_cand = cand
             best_cand_conf = conf
 
-    if cv2.waitKey(0) == ord('q'):
-        quit()
+    # if cv2.waitKey(0) == ord('q'):
+    #     quit()
 
     cv2.destroyAllWindows()
-    print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
+    # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
     return best_cand, best_cand_conf
+
 
 
 #Load individual camera trackings
@@ -114,7 +131,7 @@ with open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')) as f:
 
 mt_cont = 0
 for cam in range(0, num_cams):
-
+    print(f'Matching camera {cam}')
     ##Update mt for myself
     for key_query, element_query in dic_tracks[cam].items():
         for fr_instance in element_query:
@@ -137,7 +154,7 @@ for cam in range(0, num_cams):
                 fr_max_cand  = fr_max - offset if fr_max > offset else 0
 
                 # Increase search margin
-                extension = 2*10 # how many seconds (by frame rate)
+                extension = 1*10 # how many seconds (by frame rate)
                 fr_min_cand = fr_min_cand-extension if fr_min_cand>extension else 0
                 fr_max_cand = fr_max_cand+extension if fr_max_cand+extension<max_frames[i] else max_frames[i]
 
@@ -147,8 +164,7 @@ for cam in range(0, num_cams):
                         for obj_cand in dic_tracks_byframe[i][f'f_{f_cand}']:
                             candidates.add(obj_cand['id'])
 
-                print(f'Frame range:{fr_min_cand}-{fr_max_cand}')
-                match, conf = match_tracks(key_query, cam, candidates, i, dic_tracks) if candidates else (-1, 1)
+                match, conf = match_tracks(key_query, cam, candidates, i, dic_tracks, METHOD) if candidates else (-1, 1)
         
                 for k_mt, el_mt in dic_tracks_byframe[i].items():
                     for obj_el in el_mt:
