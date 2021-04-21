@@ -64,21 +64,24 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data):
         conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
         plt.title(conf)
         plt.xlim([0,256])
-        plt.show()
+        #plt.show()
 
         if conf>best_cand_conf:
             best_cand = cand
             best_cand_conf = conf
-    
+
+    if cv2.waitKey(0) == ord('q'):
+        quit()
+
     cv2.destroyAllWindows()
     print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
     return best_cand, best_cand_conf
 
 
-
 #Load individual camera trackings
 num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
-dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, f'c{str(cam).zfill(3)}','gt', 'gt.txt')) for cam in range(1, num_cams+1)]
+
+dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, cam,'gt', 'gt.txt')) for cam in CAM_NAMES]
 
 ##TODO: Load Neighbourhood
 adj_mat = np.array([[0, 1, 1, 1, 1],
@@ -139,11 +142,12 @@ for cam in range(0, num_cams):
                 fr_max_cand = fr_max_cand+extension if fr_max_cand+extension<max_frames[i] else max_frames[i]
 
                 candidates=set()
-                for f_cand in range(fr_min_cand, fr_min_cand+1):
+                for f_cand in range(fr_min_cand, fr_max_cand+1):
                     if f'f_{f_cand}' in dic_tracks_byframe[i]:
                         for obj_cand in dic_tracks_byframe[i][f'f_{f_cand}']:
                             candidates.add(obj_cand['id'])
 
+                print(f'Frame range:{fr_min_cand}-{fr_max_cand}')
                 match, conf = match_tracks(key_query, cam, candidates, i, dic_tracks) if candidates else (-1, 1)
         
                 for k_mt, el_mt in dic_tracks_byframe[i].items():
