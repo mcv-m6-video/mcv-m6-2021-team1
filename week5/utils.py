@@ -96,7 +96,9 @@ def parse_aicity_rects(path, zero_index=1):
         obj = {
             'bbox': [row.bb_left, row.bb_top, row.bb_left+row.bb_width, row.bb_top+row.bb_height],
             'conf': float(row.conf),
-            'id': int(row.id)
+            'id': int(row.id),
+            'mt_id': -1,
+            'mt_conf': 0
         }
         ret_dict[frame_num].append(obj)
 

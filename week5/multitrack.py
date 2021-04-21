@@ -53,12 +53,23 @@ with open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')) as f:
     for line in f:
         max_frames.append(int(line.split()[-1].replace('\n','')))
 
+mt_cont = 0
 for cam in range(0, num_cams):
+
+    ##Update mt for myself
+    for key_query, element_query in dic_tracks[cam].items():
+        for fr_instance in element_query:
+            for el_t in dic_tracks_byframe[cam][f'f_{fr_instance}']:
+                if el_t['mt_id'] == -1:
+                    el_t['mt_id'] = mt_cont
+        mt_cont+=1
+    
     for key_query, element_query in dic_tracks[cam].items():
         fr_min = np.min(list(element_query.keys()))
         fr_max = np.max(list(element_query.keys()))
-        
+
         for i in range(len(adj_mat[cam])):
+
             if adj_mat[cam][i]: #if this cam is a neighbour of the query
 
                 # Account for time mistmach
@@ -79,10 +90,14 @@ for cam in range(0, num_cams):
 
                 match, conf = match_tracks(key_query, cam, candidates, i) if candidates else (-1, 1)
         
-            #adj_mat[i][cam] = 0
-        
-print(adj_mat)
+                for k_mt, el_mt in dic_tracks_byframe[i].items():
+                    for obj_el in el_mt:
+                        if obj_el['id'] == match and not(obj_el['mt_id'] != -1 and obj_el['mt_conf']>conf):
+                            fr_aux = list(dic_tracks[cam][key_query].keys())[0]
+
+                            for ki, ei in dic_tracks_byframe[cam][f'f_{fr_aux}']:
+                                if ei['id'] == key_query:
+                                    obj_el['mt_id'] = ei['mt_id']
+                            obj_el['mt_conf'] = conf
 
 
-
-            # dic_tracks_byframe[i]
