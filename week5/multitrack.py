@@ -56,7 +56,15 @@ for cam in range(0, num_cams):
         
         for i in range(adj_mat[cam]):
             if adj_mat[cam][i]: #if this cam is a neighbour of the query
+                # Account for time mistmach
+                offset = int(time_stamps[i]*10) # 10 FPS
+                fr_min_cam = fr_min - offset if fr_min > offset else 0
+                fr_max_cam  = fr_max - offset if fr_max > offset else 0
 
+                # Increase search margin
+                extension = 10 # how many frames
+                fr_min_cam -= extension if fr_min_cam > extension else 0
+                fr_max_cam  += extension if fr_max + extension < max_frames[i] else max_frames[i]
 
 
                 # dic_tracks_byframe[i]
