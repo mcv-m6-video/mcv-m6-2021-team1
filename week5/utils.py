@@ -104,7 +104,7 @@ def parse_aicity_rects(path, zero_index=1):
 
     return ret_dict
 
-def save_aicity_rects(path, det_rects):
+def save_aicity_rects(path, det_rects, mtmc=False):
 
     COL_NAMES = ['frame', 'id', 'bb_left', 'bb_top', 'bb_width', 'bb_height', 'conf', 'x', 'y', 'z']
     dic_csv = {
@@ -113,7 +113,7 @@ def save_aicity_rects(path, det_rects):
     for f in det_rects:
         for det in det_rects[f]:
             dic_csv['frame'].append(f[2:])
-            dic_csv['id'].append(det['id'])
+            dic_csv['id'].append(det['mt_id'] if mtmc else det['id'])
             dic_csv['bb_left'].append(det['bbox'][0])
             dic_csv['bb_top'].append(det['bbox'][1])
             dic_csv['bb_width'].append(det['bbox'][2]-det['bbox'][0])

@@ -12,17 +12,18 @@ def match_tracks(query, query_cam, candidates, candidates_cam):
 ###CONGIF###
 
 DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
 
 ############
 
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
-TRACK_PATH = os.path.join(DATA_PATH, f'train\\S0{SEQ}')
+TRACK_PATH = os.path.join(DATA_PATH, f'train', f'S0{SEQ}')
 
 #Load individual camera trackings
 num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
-dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, f'c00{cam}\\gt\\gt.txt')) for cam in range(1, num_cams+1)]
+dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, f'c{str(cam).zfill(3)}','gt', 'gt.txt')) for cam in range(1, num_cams+1)]
 
 ##TODO: Load Neighbourhood
 adj_mat = np.array([[0, 1, 1, 1, 1],
@@ -101,3 +102,5 @@ for cam in range(0, num_cams):
                             obj_el['mt_conf'] = conf
 
 
+for i, det in enumerate(dic_tracks_byframe):
+    utils.save_aicity_rects(f'mtmc_S{str(SEQ).zfill(2)}_c{str(i).zfill(3)}_random.txt', det, True)

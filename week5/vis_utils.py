@@ -9,12 +9,13 @@ parentdir = os.path.dirname(currentdir)
 sys.path.append(parentdir)
 from week3 import utils as w3utils
 
-DATA_PATH = '/home/jchaves/code/temp/m6data/'
+DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 
 dets2use = ['mask_rcnn']
-tracks2use = ['mtsc_deepsort_mask_rcnn']
+tracks2use = ['random']
 
 class MOTCamera():
     """
@@ -27,7 +28,7 @@ class MOTCamera():
         self.gt = w3utils.parse_aicity_rects(os.path.join(path, 'gt', 'gt.txt'))
         self.detections = { k[4:-4]: w3utils.parse_aicity_rects(os.path.join(path, 'det', k))
             for k in os.listdir(os.path.join(path, 'det')) if '.txt' in k and any(t in k for t in dets2use)}
-        self.trackings = { k[5:-4]: w3utils.parse_aicity_rects(os.path.join(path, 'mtsc', k))
+        self.trackings = { k[5:-4]: w3utils.parse_aicity_rects(os.path.join(path, 'mtsc', k), 0)
             for k in os.listdir(os.path.join(path, 'mtsc')) if '.txt' in k and any(t in k for t in tracks2use)}
         self.num_frames = 0
         self.videopath = os.path.join(path, 'vdo.avi')
@@ -51,10 +52,10 @@ class MOTCamera():
 
     def _paint_rects(self, im):
         # det = self.detections[self.det]
-        # det = self.trackings[self.track]
-        det = self.gt
+        det = self.trackings[self.track]
+        # det = self.gt
         frame = w3utils.pretty_rects(im, det.get(f'f_{self.frame_cont}', []), 'test', (0,255,0),
-                conf_thresh=0.7, tracking = det.get('tracking', False))
+                conf_thresh=0.7, tracking = True)
         return im
 
     def _close_vid(self):
@@ -118,7 +119,7 @@ class MOTSequence():
             del c
 
 
-s = MOTSequence(3, cam_ids=[10, 11, 12, 13, 14, 15])
+s = MOTSequence(1, cam_ids=None, track='random')
 s.init_visualize()
 
 k = True
