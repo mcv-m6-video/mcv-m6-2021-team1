@@ -12,20 +12,9 @@ for camera in range(1,6):
     dic = utils.parse_aicity_rects(path_track)
     tracking.append(dic)
 
-# print(tracking[1]['f_2067'])
-# for track in tracking[1]['f_2067']:
-#     track['bbox']
-#     cv2.imshow(f'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train\\train\\S01\\c00{camera}\\vdo.avi')
-
 camera = 1
 cap = cv2.VideoCapture(f'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train\\train\\S01\\c00{camera}\\vdo.avi')
 
-# cap.set(2, 2)
-# ret, frame = cap.read()
-# print(frame)
-# # gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-# cv2.imshow('frame', frame)
-# cv.waitKey(0)
 fr_n = 0
 while(cap.isOpened()):
     ret, frame = cap.read()
