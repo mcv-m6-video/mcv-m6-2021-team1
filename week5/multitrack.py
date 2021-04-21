@@ -4,6 +4,11 @@ import cv2
 import numpy as np
 import utils
 
+
+def match_tracks(query, query_cam, candidates, candidates_cam):
+    print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
+    return -1, 1
+
 ###CONGIF###
 
 DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
@@ -37,8 +42,6 @@ for cam in range(0, num_cams):
             dic_aux[obj_t['id']][int(key[2:])] = {'bbox': obj_t['bbox'], 'conf': obj_t['conf']}        
     dic_tracks.append(dic_aux)
 
-print(dic_tracks[0][69].keys())
-
 time_stamps = []
 with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
     for line in f:
@@ -51,20 +54,31 @@ with open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')) as f:
 
 for cam in range(0, num_cams):
     for key_query, element_query in dic_tracks[cam].items():
-        fr_min = np.min(element_query.keys())
-        fr_max = np.max(element_query.keys())
+        fr_min = np.min(list(element_query.keys()))
+        fr_max = np.max(list(element_query.keys()))
         
-        for i in range(adj_mat[cam]):
+        for i in range(len(adj_mat[cam])):
             if adj_mat[cam][i]: #if this cam is a neighbour of the query
+
                 # Account for time mistmach
                 offset = int(time_stamps[i]*10) # 10 FPS
-                fr_min_cam = fr_min - offset if fr_min > offset else 0
-                fr_max_cam  = fr_max - offset if fr_max > offset else 0
+                fr_min_cand = fr_min - offset if fr_min > offset else 0
+                fr_max_cand  = fr_max - offset if fr_max > offset else 0
 
                 # Increase search margin
-                extension = 10 # how many frames
-                fr_min_cam -= extension if fr_min_cam > extension else 0
-                fr_max_cam  += extension if fr_max + extension < max_frames[i] else max_frames[i]
+                extension = 2*10 # how many seconds (by frame rate)
+                fr_min_cand = fr_min_cand-extension if fr_min_cand>extension else 0
+                fr_max_cand = fr_max_cand+extension if fr_max_cand+extension<max_frames[i] else max_frames[i]
+
+                candidates=set()
+                for f_cand in range(fr_min_cand, fr_min_cand+1):
+                    if f'f_{f_cand}' in dic_tracks_byframe[i]:
+                        for obj_cand in dic_tracks_byframe[i][f'f_{f_cand}']:
+                            candidates.add(obj_cand['id'])
+
+                match, conf = match_tracks(key_query, cam, candidates, i) if candidates else (-1, 1)
+                
+                
 
 
             # dic_tracks_byframe[i]
