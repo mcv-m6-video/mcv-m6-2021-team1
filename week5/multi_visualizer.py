@@ -145,14 +145,18 @@ class MOTSequence():
         self._show_frames(frames, txt_info=txt_info, scale=scale)
 
     def _show_frames(self, frames, txt_info='', scale=0.5):
+        txt_info += ' [REC]' if self.gif_flag else '[___]'
         for k, v in frames.items():
             v = cv2.resize(v, tuple(np.int0(scale*np.array(v.shape[:2][::-1]))))
 
             h, w = v.shape[:2]
-            x, y = int(w*0.75), int(h*0.8)
-            txt_info += '[REC]' if self.gif_flag else '[___]'
-            v = cv2.putText(v, txt_info, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
-                w3utils.get_optimal_font_scale(txt_info, w*0.1), (0, 0, 255), 2)
+            x, y = int(w*0.6), int(h*0.8)
+            
+            # v = cv2.putText(v, txt_info, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
+            #     w3utils.get_optimal_font_scale(txt_info, w*0.1), (0, 0, 255), 2)
+            txt_info_f = f'{txt_info} {self.cams[k].frame_cont}'
+            v = cv2.putText(v, txt_info_f, (x, y), cv2.FONT_HERSHEY_COMPLEX_SMALL, 
+                1, (0, 0, 255), 2)
 
             cv2.imshow(k, v)
         # return cv2.waitKey(0)
@@ -174,11 +178,11 @@ class MOTSequence():
 
 os.makedirs(GIF_OUT_DIR, exist_ok=True)
 
-s = MOTSequence(3, cam_ids=[13, 14, 15])
+s = MOTSequence(1, cam_ids=[1, 2, 3])
 s.init_visualize()
 
 WAIT_TIME_LIST = [30, 60, 0, 10] # Available display speeds
-wait_time_idx = 0 # start at 33 FPS (15 ms per frame)
+wait_time_idx = 2 # start at 33 FPS (15 ms per frame)
 disp_scale = 0.5
 
 k = True
