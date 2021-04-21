@@ -64,8 +64,8 @@ class MOTCamera():
 
     def _paint_rects(self, im):
         # det = self.detections[self.det]
-        # det = self.trackings[self.track]
-        det = self.gt
+        det = self.trackings[self.track]
+        # det = self.gt
         frame = w3utils.pretty_rects(im, det.get(f'f_{self.frame_cont}', []), 'test', (0,255,0),
                 conf_thresh=0.7, tracking = True)
         return im
@@ -106,11 +106,15 @@ class MOTSequence():
 
         try:
             # Add our detections
+            print(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}'))
+            print(os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}')))
             for cam in os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}')):
-                for algorithm in os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam):
-                    self.cams[cam].trackings[algorithm[:-4]] = w3utils.parse_aicity_rects(
-                        os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam, algorithm), zero_index=0)
-                    
+                print(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam))
+                for algorithm in os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam)):
+                    if int(cam[1:]) in cam_ids:
+                        self.cams[cam].trackings[algorithm[:-4]] = w3utils.parse_aicity_rects(
+                            os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam, algorithm), zero_index=0)
+                        
         except FileNotFoundError:
             print('Error reading our detections')
 
@@ -178,7 +182,7 @@ class MOTSequence():
 
 os.makedirs(GIF_OUT_DIR, exist_ok=True)
 
-s = MOTSequence(1, cam_ids=[1, 2, 3])
+s = MOTSequence(1, cam_ids=[1, 2, 3], track='random')
 s.init_visualize()
 
 WAIT_TIME_LIST = [30, 60, 0, 10] # Available display speeds
