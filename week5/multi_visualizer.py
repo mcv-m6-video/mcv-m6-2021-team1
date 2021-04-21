@@ -102,6 +102,13 @@ class MOTSequence():
         self.gif_flag = False
         self.dtstring = datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
 
+        # Add our detections
+        for cam in os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}')):
+            for algorithm in os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam):
+                self.cams[cam].trackings.append(
+                    w3utils.parse_aicity_rects(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam, algorithm), zero_index=0)
+                )
+
     def init_visualize(self, ids=None):
         self.frame_cont = 0
 
