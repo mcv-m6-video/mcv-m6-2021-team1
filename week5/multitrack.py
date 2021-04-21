@@ -30,6 +30,7 @@ adj_mat = np.array([[0, 1, 1, 1, 1],
                     [1, 1, 0, 1, 1],
                     [1, 1, 1, 0, 1],
                     [1, 1, 1, 1, 0]])
+adj_mat = np.triu(adj_mat)
 
 #Sort by id
 dic_tracks = []
@@ -77,8 +78,11 @@ for cam in range(0, num_cams):
                             candidates.add(obj_cand['id'])
 
                 match, conf = match_tracks(key_query, cam, candidates, i) if candidates else (-1, 1)
-                
-                
+        
+            #adj_mat[i][cam] = 0
+        
+print(adj_mat)
+
 
 
             # dic_tracks_byframe[i]
