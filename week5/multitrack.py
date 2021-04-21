@@ -3,11 +3,7 @@ import sys
 import cv2
 import numpy as np
 import utils
-
-
-def match_tracks(query, query_cam, candidates, candidates_cam):
-    print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
-    return list(candidates)[0], 1
+from matplotlib import pyplot as plt
 
 ###CONGIF###
 
@@ -20,6 +16,65 @@ SEQ = 1
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 TRACK_PATH = os.path.join(DATA_PATH, f'train', f'S0{SEQ}')
+
+CAM_NAMES = []
+with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
+    for line in f:
+        CAM_NAMES.append(line.split()[0])
+
+def crop_bbox(cam, frame, bbox):
+    cap_aux = cv2.VideoCapture(os.path.join(DATA_PATH, 'train', f'S{str(SEQ).zfill(2)}', CAM_NAMES[cam], 'vdo.avi'))
+    cap_aux.set(1, frame)
+    _, fr_im = cap_aux.read()
+    cap_aux.release()
+    return fr_im[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+
+def match_tracks(query, query_cam, candidates, candidates_cam, dic_data):
+    print(f'We are looking for a match between the id {query} in the camera {query_cam} and the list {candidates} in {candidates_cam}.')
+
+    fr_query = list(dic_data[query_cam][query].keys())[0]
+    bb_query = dic_data[query_cam][query][fr_query]['bbox']
+
+    query_im = crop_bbox(query_cam, fr_query, bb_query)
+
+    cv2.imshow('im_query', query_im)
+    cv2.waitKey(0)
+
+    best_cand = -1
+    best_cand_conf = 0
+    for cand in candidates:
+
+        fr_cand = list(dic_data[candidates_cam][cand].keys())[0]
+        bb_cand = dic_data[candidates_cam][cand][fr_cand]['bbox']
+
+        cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
+
+        cv2.imshow(f'candidate {cand}', cand_im)
+        cv2.waitKey(0)
+        
+        H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
+        plt.plot(H1,color = 'b')
+        H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
+        plt.plot(H2,color = 'r')
+
+        #normalize hists
+        H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
+        H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
+
+        conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
+        plt.title(conf)
+        plt.xlim([0,256])
+        plt.show()
+
+        if conf>best_cand_conf:
+            best_cand = cand
+            best_cand_conf = conf
+    
+    cv2.destroyAllWindows()
+    print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
+    return best_cand, best_cand_conf
+
+
 
 #Load individual camera trackings
 num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
@@ -89,7 +144,7 @@ for cam in range(0, num_cams):
                         for obj_cand in dic_tracks_byframe[i][f'f_{f_cand}']:
                             candidates.add(obj_cand['id'])
 
-                match, conf = match_tracks(key_query, cam, candidates, i) if candidates else (-1, 1)
+                match, conf = match_tracks(key_query, cam, candidates, i, dic_tracks) if candidates else (-1, 1)
         
                 for k_mt, el_mt in dic_tracks_byframe[i].items():
                     for obj_el in el_mt:
@@ -101,13 +156,6 @@ for cam in range(0, num_cams):
                                     obj_el['mt_id'] = ei['mt_id']
                             obj_el['mt_conf'] = conf
 
-
-cam_names = []
-with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
-    for line in f:
-        cam_names.append(line.split()[0])
-
 for i, det in enumerate(dic_tracks_byframe):
-    os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(cam_names[i]).zfill(3)}',exist_ok=True)
-
-    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(cam_names[i]).zfill(3)}/random.txt', det, True)
+    os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}',exist_ok=True)
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/random.txt', det, True)
