@@ -32,7 +32,6 @@ def crop_bbox(cam, frame, bbox):
 
 def hist_rgb_match(query_data, cand_data):
 
-
     query_im = crop_bbox(*query_data[0])
     cand_im = crop_bbox(*cand_data[0])
 
