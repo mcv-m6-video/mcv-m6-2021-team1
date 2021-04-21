@@ -46,7 +46,7 @@ class MOTCamera():
         self.det = det
         self.track = track
 
-        self.last_frame = None
+        self.last_frame = np.zeros((100, 100), dtype=np.uint8)
 
     def init_capture(self):
         print(f'\tInitializing capture for camera {self.cam_name}...')
@@ -58,7 +58,8 @@ class MOTCamera():
         self.frame_cont += 1
         ret, frame =  self.cap.read()
         frame = self._paint_rects(frame)
-        self.last_frame = frame
+        if ret:
+            self.last_frame = frame
         return ret, frame
 
     def _paint_rects(self, im):
@@ -101,13 +102,17 @@ class MOTSequence():
         self.gifs_to_save = {k: {} for k in self.cams}
         self.gif_flag = False
         self.dtstring = datetime.datetime.now().strftime('%Y_%m_%d-%H_%M_%S')
+        os.makedirs( os.path.join('w6gifs', self.dtstring), exist_ok=True)
 
-        # Add our detections
-        for cam in os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}')):
-            for algorithm in os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam):
-                self.cams[cam].trackings.append(
-                    w3utils.parse_aicity_rects(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam, algorithm), zero_index=0)
-                )
+        try:
+            # Add our detections
+            for cam in os.listdir(os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}')):
+                for algorithm in os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam):
+                    self.cams[cam].trackings[algorithm[:-4]] = w3utils.parse_aicity_rects(
+                        os.path.join('mtrackings',f'S{str(seq_num).zfill(2)}', cam, algorithm), zero_index=0)
+                    
+        except FileNotFoundError:
+            print('Error reading our detections')
 
     def init_visualize(self, ids=None):
         self.frame_cont = 0
@@ -134,8 +139,8 @@ class MOTSequence():
         self.frame_cont += 1
 
         if self.gif_flag:
-            for k, v in self.frames:
-                gif_buffer[k].append(v)
+            for k, v in frames.items():
+                self.gif_buffer[k].append(v)
 
         self._show_frames(frames, txt_info=txt_info, scale=scale)
 
@@ -158,15 +163,13 @@ class MOTSequence():
     
     def toggle_gifs(self):
         if self.gif_flag:
-            for k, v in self.cams:
+            for k, v in self.cams.items():
                 self.gif_flag = False
-                self.gifs_to_save[k][os.path.join(GIF_OUT_DIR, self.dtstring, f'gif_{v.cam_name}_{v.frame_cont}.gif')] = gif_buffer
-                self.gif_buffer[k] = None
+                self.gifs_to_save[k][os.path.join(GIF_OUT_DIR, self.dtstring, f'gif_{v.cam_name}_{self.frame_cont}.gif')] = self.gif_buffer[k]
+                self.gif_buffer[k] = []
         else:
             print('Init gif')
             self.gif_flag = True
-            for k, v in self.cams.items():
-                self.gif_buffer[k] = [w5utils.gif_preprocess(v.get_last_frame())]
 
 
 os.makedirs(GIF_OUT_DIR, exist_ok=True)
@@ -189,6 +192,7 @@ while k != ord('q'):
     k = cv2.waitKey(wait_time)
 
     if k == ord('q'): # quit
+        print('Exiting...')
         break
     elif k == ord('+'):
         disp_scale += 0.1 if disp_scale < 1 else 0
@@ -201,5 +205,12 @@ while k != ord('q'):
     elif k == ord('p'): # Pause
         wait_time_idx += 1
         # wait_time = int(not(bool(wait_time)))
-    
-print(s.gifs_to_save)
+
+# Save gifs
+print('Saving gifs, wait a while...')
+for cam, savelist in s.gifs_to_save.items():
+    for path, buffer in savelist.items():
+        if not buffer:
+            continue
+        imageio.mimsave(path, buffer)
+        optimize(path)
