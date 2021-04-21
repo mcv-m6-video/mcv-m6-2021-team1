@@ -99,10 +99,11 @@ def main(args, sequence, cameras):
     tsfiles = [[f for f in glob.glob(os.path.join(TR_PATH, '*.txt')) if not os.path.basename(f).startswith('eval')] for TR_PATH in TR_PATHS]
     gtfiles = list(zip(*[[glob.glob(os.path.join(GT_PATH, 'gt/gt.txt'))[0] for f in TR_PATH] for GT_PATH, TR_PATH in zip(GT_PATHS, TR_PATHS)]))
     tsfiles = list(zip(*[[f for f in glob.glob(os.path.join(TR_PATH, '*.txt')) if not os.path.basename(f).startswith('eval')] for TR_PATH in TR_PATHS]))
-    print(gtfiles[1])
-    print(tsfiles[1])
+    #print(gtfiles[1])
+    #print(tsfiles[1])
 
-    logging.info('Found %d groundtruths and %d test files.', len(gtfiles), len(tsfiles))
+    #logging.info('Found %d groundtruths and %d test files.', len(gtfiles), len(tsfiles))
+    logging.info('Found %d test files.', len(tsfiles))
     logging.info('Available LAP solvers %s', str(mm.lap.available_solvers))
     logging.info('Default LAP solver \'%s\'', mm.lap.default_solver)
     logging.info('Loading files.')
