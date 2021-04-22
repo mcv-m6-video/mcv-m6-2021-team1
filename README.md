@@ -414,6 +414,17 @@ $ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
  
  ## Multi-target multi-camera (MTMC) tracking
  
+ This scripts allow us to obtain the multitracking files for the different sequences. The files are saved in mtrackings/S0X/C0Y/method.txt. 
+ This is the folder format the metric script will need in order to evaluate the tracking.
+ 
+  ```
+$ python multitracker.py 
+ ```
+ 
+ Note: Before running the script it is necessary to change the DATA_PATH variable to point to the challenge dataset.
+ Also it is needed to indicate de Sequence number, and the method for matching selected. (On the top of the code, in the Config options part)
+
+ 
  ## Multi-camera evaluation
  
  Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
