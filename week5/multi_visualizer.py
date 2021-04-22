@@ -55,11 +55,11 @@ class MOTCamera():
 
     def get_frame(self):
         print(f'\tGetting frame {self.frame_cont} frame for camera {self.cam_name}...')
-        self.frame_cont += 1
         ret, frame =  self.cap.read()
         frame = self._paint_rects(frame)
         if ret:
             self.last_frame = frame
+        self.frame_cont += 1
         return ret, frame
 
     def _paint_rects(self, im):
@@ -182,7 +182,7 @@ class MOTSequence():
 
 os.makedirs(GIF_OUT_DIR, exist_ok=True)
 
-s = MOTSequence(1, cam_ids=[1, 2, 3], track='random')
+s = MOTSequence(3, None, track='vgg16_l2')
 s.init_visualize()
 
 WAIT_TIME_LIST = [30, 60, 0, 10] # Available display speeds
@@ -207,6 +207,7 @@ while k != ord('q'):
     elif k == ord('-'):
         disp_scale -= 0.1 if disp_scale > 0.1 else 0
     # elif k == ord('s'): # Snapshot
+    #     f
     #     cv2.imwrite(f'save_{frame_cont}.png', display_frame)
     elif k == ord('g'):  # toggle gif
         s.toggle_gifs()

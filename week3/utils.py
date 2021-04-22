@@ -183,6 +183,7 @@ def get_optimal_font_scale(text, width):
 
 def pretty_rects(im, objs, name, color, conf_thresh=0.0, tracking = False):
     for obj in objs:
+        print(float(obj["conf"]))
         if float(obj["conf"]) < conf_thresh:
             continue
         if tracking:

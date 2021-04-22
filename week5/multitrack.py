@@ -1,8 +1,11 @@
 import os
 import sys
 import cv2
+import torch
+import torchvision
 import numpy as np
 import utils
+from torch import nn
 from matplotlib import pyplot as plt
 
 ###CONGIF###
@@ -10,7 +13,7 @@ from matplotlib import pyplot as plt
 # DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
 DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
-METHOD = 'hist_rgb'
+METHOD = 'vgg16'
 
 ############
 
@@ -19,9 +22,34 @@ TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 TRACK_PATH = os.path.join(DATA_PATH, f'train', f'S0{SEQ}')
 
 CAM_NAMES = []
+
+# TORCH
+TORCH_PREP = torchvision.transforms.Compose([torchvision.transforms.ToTensor(),
+    torchvision.transforms.Normalize(mean=[0.485, 0.456, 0.406], std=[0.229, 0.224, 0.225])])
+VGG16 = torchvision.models.vgg16(pretrained=True)
+VGG16.classifier = nn.Sequential(*list(VGG16.classifier.children())[:-5])
+# DEVICE = torch.DEVICE("cuda:0" if torch.cuda.is_available() else "cpu")
+# VGG16.to(DEVICE)
+
 with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
     for line in f:
         CAM_NAMES.append(line.split()[0])
+
+def vgg16_match(query_data, cand_data):
+
+    with torch.no_grad():
+        query_im = crop_bbox(*query_data[0])
+        cand_im = crop_bbox(*cand_data[0])
+
+        H1 = np.array(VGG16(TORCH_PREP(query_im).unsqueeze(0).to(DEVICE)).to('cpu'))
+        H2 = np.array(VGG16(TORCH_PREP(cand_im).unsqueeze(0).to(DEVICE)).to('cpu'))
+
+        H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
+        H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
+
+        conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
+
+    return conf
 
 def crop_bbox(cam, frame, bbox):
     cap_aux = cv2.VideoCapture(os.path.join(DATA_PATH, 'train', f'S{str(SEQ).zfill(2)}', CAM_NAMES[cam], 'vdo.avi'))
@@ -66,6 +94,9 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
     query_data = [(query_cam, fr_query, dic_data[query_cam][query][fr_query]['bbox']) 
         for fr_query in dic_data[query_cam][query]]
 
+
+    query_im = crop_bbox(*query_data[0])
+
     best_cand = -1
     best_cand_conf = 0
     for cand in candidates:
@@ -77,6 +108,21 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
             conf = hist_rgb_match(query_data, cand_data)
         elif method == 'hist_3d':
             conf = hist_3d_match(query_data, cand_data)
+        elif 'vgg16':
+            # conf = vgg16_match(query_data, cand_data)
+            with torch.no_grad():
+                cand_im = crop_bbox(*cand_data[0])
+                H1 = np.array(VGG16(TORCH_PREP(query_im).unsqueeze(0)))
+                H2 = np.array(VGG16(TORCH_PREP(cand_im).unsqueeze(0)))
+
+            H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
+            H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
+
+            # conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_)
+            conf = 1 / (np.linalg.norm(H1 - H2) + 1)
+
+            if conf  < 0.46:
+                conf = 0
         else:
             continue
 
@@ -87,54 +133,6 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
     cv2.destroyAllWindows()
     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
     return best_cand, best_cand_conf
-        
-# def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
-    
-#     fr_query = list(dic_data[query_cam][query].keys())[0]
-#     bb_query = dic_data[query_cam][query][fr_query]['bbox']
-
-#     query_im = crop_bbox(query_cam, fr_query, bb_query)
-
-#     # cv2.imshow('im_query', query_im)
-#     # cv2.waitKey(0)
-
-#     best_cand = -1
-#     best_cand_conf = 0
-#     for cand in candidates:
-
-#         fr_cand = list(dic_data[candidates_cam][cand].keys())[0]
-#         bb_cand = dic_data[candidates_cam][cand][fr_cand]['bbox']
-
-#         cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
-
-#         # cv2.imshow(f'candidate {cand}', cand_im)
-#         # cv2.waitKey(0)
-        
-#         H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
-#         # plt.plot(H1,color = 'b')
-#         H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
-#         # plt.plot(H2,color = 'r')
-
-#         #normalize hists
-#         H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
-#         H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
-
-#         conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
-#         # plt.title(conf)
-#         # plt.xlim([0,256])
-#         #plt.show()
-
-#         if conf>best_cand_conf:
-#             best_cand = cand
-#             best_cand_conf = conf
-
-#     # if cv2.waitKey(0) == ord('q'):
-#     #     quit()
-
-#     cv2.destroyAllWindows()
-#     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
-#     return best_cand, best_cand_conf
-
 
 
 #Load individual camera trackings
@@ -143,12 +141,47 @@ num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
 dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, cam,'gt', 'gt.txt')) for cam in CAM_NAMES]
 
 ##TODO: Load Neighbourhood
+# Seq 1
 adj_mat = np.array([[0, 1, 1, 1, 1],
                     [1, 0, 1, 1, 1],
                     [1, 1, 0, 1, 1],
                     [1, 1, 1, 0, 1],
                     [1, 1, 1, 1, 0]])
 adj_mat = np.triu(adj_mat)
+
+# seq 3
+# adj_mat = np.array([[0, 1, 1, 1, 1, 1],
+#                     [1, 0, 1, 1, 1, 1],
+#                     [1, 1, 0, 1, 1, 1],
+#                     [1, 1, 1, 0, 1, 1],
+#                     [1, 1, 1, 1, 0, 1],
+#                     [1, 1, 1, 1, 1, 0]])
+
+# adj_mat = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+#                     [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 
 #Sort by id
 dic_tracks = []
@@ -221,4 +254,4 @@ for cam in range(0, num_cams):
 
 for i, det in enumerate(dic_tracks_byframe):
     os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}',exist_ok=True)
-    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/hist_rgb_hell.txt', det, True)
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/vgg16_l2.txt', det, True)
