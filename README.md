@@ -10,7 +10,14 @@
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
 
+[Week1](#week1)  
+[Week2](#week2)  
+[Week3](#week3)  
+[Week4](#week4)  
+[Week5](#week5)  
+
 # Week 5
+<a name="week5"/>
 
 The implementation of this week have been split into two well divided parts:
 
@@ -77,6 +84,7 @@ $ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
  Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
 
 # Week 4
+<a name="week4"/>
 
 ### 1.1 Compute optical flow
 
@@ -170,6 +178,7 @@ optional arguments:optional arguments:
 The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
 
 # <a name="w3"></a> Week 3
+<a name="week3"/>
 
 ## Requirements
 Apart from the packages on requirements.txt. you must follow the instructions on [this link](https://github.com/LucaCappelletti94/pygifsicle) for installing pygifsicle (used for reducing gif size).
@@ -333,6 +342,7 @@ Layout for test data
 Ground truth and detection is matched according to SEQUENCE_X. Results are displayed on the console.
 
 # <a name="w1"></a> Week 2
+<a name="week2"/>
 
 ## Runner
 All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
@@ -376,7 +386,7 @@ optional arguments:
 There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
 
 
-# <a name="w1"></a> Week1
+# <a name="week1"></a> Week1
 
 ## Tasks 1 and 2
 Tasks 1.1, 1.2 and 2 are implemented between the files `main.py` and `utils.py`. 
