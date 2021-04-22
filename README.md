@@ -71,7 +71,7 @@ $ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
  Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
 
  ```
-$ python w5_run_metrics_single.py -s SEQUENCE -f INPUT_FOLDER
+$ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
  ```
  
  Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
