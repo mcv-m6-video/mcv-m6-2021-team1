@@ -15,7 +15,8 @@ import colorsys
 # sys.path.append(parentdir)
 # import utils as w5utils
 # from week3 import utils as w3utils
-DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+#DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+DATA_PATH = '/home/group01/M6/data/aic19-track1-mtmc-train'
 
 color_id =  {}
 
@@ -119,7 +120,7 @@ def get_GT_path(sequence, camera):
 
 def get_TRACKING_path(sequence, camera, folder="output_post"):
     # sequence: sequence ID integer, camera: camera ID integer
-    return f"{folder}/S{sequence:02d}/C{camera:03d}/"
+    return f"{folder}/S{sequence:02d}/c{camera:03d}/"
 
 def get_random_col():
     h,s,l = random.random(), 0.5 + random.random()/2.0, 0.4 + random.random()/5.0

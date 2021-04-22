@@ -21,7 +21,7 @@ from pathlib import Path
 import pandas as pd
 
 import motmetrics as mm
-from week5.utils import get_GT_path, get_TRACKING_path
+from week5.utils2 import get_GT_path, get_TRACKING_path
 
 VIDEOS_LIST = ((1, list(range(1,6))), (3, list(range(10,16))), (4, list(range(16,41))))
 
@@ -146,4 +146,5 @@ if __name__ == '__main__':
     for (sequence, cameras) in VIDEOS_LIST:
         if args.sequence != -1 and args.sequence != sequence:
             continue
+        print(f"\nEvaluating sequence {sequence}...")
         main(args, sequence, cameras)

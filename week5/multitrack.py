@@ -2,15 +2,27 @@ import os
 import sys
 import cv2
 import numpy as np
-import utils
+import utils as utils
 from matplotlib import pyplot as plt
+import sys
+sys.path.append("./TransReID")
+from TransReID.demo import *
+import torch
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Post-process detections')
+parser.add_argument('-s', '--sequence', type=int)
+parser.add_argument('-m', '--method', type=str)
+args = parser.parse_args()
+
 
 ###CONGIF###
 
-DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+DATA_PATH = '/home/group01/M6/data/aic19-track1-mtmc-train'
 #DATA_PATH = '/home/capiguri/code/datasets/m6data/'
-SEQ = 4
-METHOD = 'hist_3d'
+SEQ = args.sequence
+METHOD = args.method
 # OPTIONS: 'hist_3d', 'hist_rgb'
 
 ############
@@ -18,6 +30,8 @@ METHOD = 'hist_3d'
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 TRACK_PATH = os.path.join(DATA_PATH, f'train', f'S0{SEQ}')
+
+MODEL = None
 
 CAM_NAMES = []
 with open(os.path.join(TIMESTAMP_PATH, f'S0{SEQ}.txt')) as f:
@@ -30,6 +44,32 @@ def crop_bbox(cam, frame, bbox):
     _, fr_im = cap_aux.read()
     cap_aux.release()
     return fr_im[bbox[1]:bbox[3], bbox[0]:bbox[2]]
+
+def transformer_match_intensive(query_data, cand_data):
+    global MODEL
+    if MODEL is None:
+        MODEL = load_model()
+
+    query_features = np.array([get_transformer_features(MODEL, crop_bbox(*query)) for query in query_data]).mean(axis=0)
+    cand_features = np.array([get_transformer_features(MODEL, crop_bbox(*cand)) for cand in cand_data]).mean(axis=0)
+    
+    distance = np.linalg.norm(query_features - cand_features)
+    return -distance
+
+
+def transformer_match(query_data, cand_data):
+    global MODEL
+    if MODEL is None:
+        MODEL = load_model()
+
+    query_im = crop_bbox(*query_data[0])
+    cand_im = crop_bbox(*cand_data[0])
+    
+    query_features = get_transformer_features(MODEL, query_im)
+    cand_features = get_transformer_features(MODEL, query_im)
+
+    distance = np.linalg.norm(query_features - cand_features)
+    return -distance
 
 def hist_rgb_match(query_data, cand_data):
 
@@ -82,6 +122,10 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
             conf = hist_rgb_match(query_data, cand_data)
         elif method == 'hist_3d':
             conf = hist_3d_match(query_data, cand_data)
+        elif method == 'transformer':
+            conf = transformer_match(query_data, cand_data)
+        elif method == 'transformer_intensive':
+            conf = transformer_match_intensive(query_data, cand_data)
         else:
             continue
 
