@@ -54,7 +54,7 @@ This week, we also implemented several post-processing functions to filter the h
 $ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
  ```
  
- ## Single-camera evaluation
+ ## 2. Single-camera evaluation
  
  Now, the output folder can be evaluated using the script of single evaluation:
 
