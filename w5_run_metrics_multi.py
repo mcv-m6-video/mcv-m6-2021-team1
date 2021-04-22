@@ -21,7 +21,7 @@ from pathlib import Path
 import pandas as pd
 
 import motmetrics as mm
-from week5.utils2 import get_GT_path, get_TRACKING_path
+from week5.utils import get_GT_path, get_TRACKING_path
 
 VIDEOS_LIST = ((1, list(range(1,6))), (3, list(range(10,16))), (4, list(range(16,41))))
 
@@ -57,7 +57,6 @@ Sequences of ground truth and test will be matched according to the `<SEQUENCE_X
 string.""", formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('-s', '--sequence', type=int, default=-1, help="sequence")
-    parser.add_argument('-c', '--camera', type=int, default=-1, help="camera")
     parser.add_argument('-f', '--folder', type=str, default="../output_post", help="tracking folder")
     parser.add_argument('--loglevel', type=str, help='Log level', default='info')
     parser.add_argument('--fmt', type=str, help='Data format', default='mot15-2D')
@@ -142,7 +141,7 @@ def main(args, sequence, cameras):
 
 if __name__ == '__main__':
     args = parse_args()
-    sequence, camera = args.sequence, args.camera
+    sequence = args.sequence
 
     for (sequence, cameras) in VIDEOS_LIST:
         if args.sequence != -1 and args.sequence != sequence:
