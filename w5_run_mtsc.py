@@ -68,6 +68,19 @@ def run(sequence, camera, detection, save_video=False):
         if save_video:
             update_colors(detections, trackid2colors)
             frame = draw_tracking_bboxes(frame, detections, trackid2colors)
+
+            font                   = cv2.FONT_HERSHEY_SIMPLEX
+            pos = (60,60)
+            fontScale              = 1
+            fontColor              = (255,255,255)
+            lineType               = 2
+
+            cv2.putText(frame,f'{i:06d}', 
+                pos, 
+                font, 
+                fontScale,
+                fontColor,
+                lineType)
             writer.append_data(frame)
 
         if args.max != -1 and i >= args.max:
@@ -75,19 +88,24 @@ def run(sequence, camera, detection, save_video=False):
 
     #print(f"DONE!")# {counter} frames processed")
     #print(f"Saving to... {args.output}")
-    save_aicity_rects(os.path.join(results_path, f"{filename}.txt"), results_dict)
     if save_video:
         writer.close()
+    else:
+        save_aicity_rects(os.path.join(results_path, f"{filename}.txt"), results_dict)
     reader.close()
     #print(f"Saved to '{results_path}'")
 
 
 def main(args):
-    for (seq, cameras) in VIDEOS_LIST:
-        for camera in cameras:
-            print(f"> S{seq:02d}-C{camera:03d}")
-            for det in tqdm(DETECTIONS):
-                run(seq, camera, det, save_video=args.video)
+    if args.sequence != -1 and args.camera != -1:
+        run(args.sequence, args.camera, args.detections, save_video=args.video)
+    else:
+        for (seq, cameras) in VIDEOS_LIST:
+            for camera in cameras:
+                print(f"> S{seq:02d}-C{camera:03d}")
+                for det in tqdm(DETECTIONS):
+                    run(seq, camera, det, save_video=args.video)
+
     
     
 
@@ -95,13 +113,14 @@ def main(args):
 
 
 parser = argparse.ArgumentParser(description='Allows to run several tracking-by-detection algorithms.')
+parser.add_argument('-s', '--sequence', type=int, default=-1, help="sequence")
+parser.add_argument('-c', '--camera', type=int, default=-1, help="camera")
+parser.add_argument('-d', '--detections', type=str, default="ssd512", help="detections")
 parser.add_argument('-o', '--output', type=str, default="../output", help="where results will be saved")
-parser.add_argument('-d', '--detections', type=str, default=".", help="detections used for tracking. Options: {yolo3, ssd512, mask_rcnn}")
 parser.add_argument('-t', '--tracker', type=str, default="identity", help='tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "medianflow"}')
 parser.add_argument('-th', '--threshold', type=float, default=0.5, help="threshold used to filter detections")
 parser.add_argument('-tl', '--tracker_life', type=int, default=5, help="tracker life")
 parser.add_argument('-v', '--video', action='store_true', help="tracker life")
-parser.add_argument('-ov', '--only_video', action='store_true', help="tracker life")
 parser.add_argument('-M', '--max', type=int, default=-1, help="max number of frames to run the tracker (by default it runs all video). Set to '-1' by default.")
 parser.add_argument('-m', '--min', type=int, default=-1, help="min number of frames to run the tracker (by default it runs all video). Set to '-1' by default.")
 args = parser.parse_args()

@@ -109,7 +109,7 @@ def parked_cars_analysis(args):
         plt.xlabel("STD norm of (cx, cy, w, h)")
         sns.distplot(stds_per_detector[det], bins=100, color=col, hist=True, kde=False, norm_hist=True)
         plt.xlim((0, 300))
-        plt.ylim(0, 0.10)
+        plt.ylim(0, 0.04)
         plt.savefig(f"plot_{det}.png", dpi=250)
                     #save_aicity_rects(to_path, results_dict)
 

@@ -22,3 +22,11 @@ outputs/
 
 # Week 4
 *output/
+
+# Week 5
+*.err
+*.out
+*.sbatch
+*.log
+*.png
+week5/logs

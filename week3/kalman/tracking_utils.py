@@ -60,9 +60,11 @@ def draw_tracking_bboxes(frame, dets, trackid2colors):
         bbox = det.bbox  # detection
         (x0, y0, x, y) = (int(bbox[0]), int(bbox[1]), int(bbox[2]), int(bbox[3]))
         if det.from_tracker:
+            continue
             cv2.rectangle(frame, (x0, y0), (x, y), color, 2)
         else:
             cv2.rectangle(frame, (x0, y0), (x, y), (0,0,0), 4)
+            continue
         if det.from_tracker and det.track_id != -1:
             cv2.putText(frame, str(det.track_id), (x + 10, y), cv2.FONT_HERSHEY_SIMPLEX, 1, color, 2)
 
