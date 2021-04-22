@@ -422,7 +422,7 @@ $ python multitracker.py
  ```
  
  Note: Before running the script it is necessary to change the DATA_PATH variable to point to the challenge dataset.
- Also it is needed to indicate de Sequence number, and the method for matching selected. (On the top of the code, in the Config options part)
+ Also it is needed to indicate de Sequence number, and the method for matching prefered. (On the top of the code, in the Config options part)
 
  
  ## Multi-camera evaluation
