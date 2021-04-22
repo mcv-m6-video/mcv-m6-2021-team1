@@ -9,7 +9,7 @@ from matplotlib import pyplot as plt
 
 DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
 #DATA_PATH = '/home/capiguri/code/datasets/m6data/'
-SEQ = 1
+SEQ = 4
 METHOD = 'hist_3d'
 # OPTIONS: 'hist_3d', 'hist_rgb'
 
@@ -93,66 +93,49 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
     return best_cand, best_cand_conf
         
-# def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method):
-    
-#     fr_query = list(dic_data[query_cam][query].keys())[0]
-#     bb_query = dic_data[query_cam][query][fr_query]['bbox']
-
-#     query_im = crop_bbox(query_cam, fr_query, bb_query)
-
-#     # cv2.imshow('im_query', query_im)
-#     # cv2.waitKey(0)
-
-#     best_cand = -1
-#     best_cand_conf = 0
-#     for cand in candidates:
-
-#         fr_cand = list(dic_data[candidates_cam][cand].keys())[0]
-#         bb_cand = dic_data[candidates_cam][cand][fr_cand]['bbox']
-
-#         cand_im = crop_bbox(candidates_cam, fr_cand, bb_cand)
-
-#         # cv2.imshow(f'candidate {cand}', cand_im)
-#         # cv2.waitKey(0)
-        
-#         H1 = cv2.calcHist([query_im],[1],None,[256],[0,256])
-#         # plt.plot(H1,color = 'b')
-#         H2 = cv2.calcHist([cand_im],[1],None,[256],[0,256])
-#         # plt.plot(H2,color = 'r')
-
-#         #normalize hists
-#         H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
-#         H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
-
-#         conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
-#         # plt.title(conf)
-#         # plt.xlim([0,256])
-#         #plt.show()
-
-#         if conf>best_cand_conf:
-#             best_cand = cand
-#             best_cand_conf = conf
-
-#     # if cv2.waitKey(0) == ord('q'):
-#     #     quit()
-
-#     cv2.destroyAllWindows()
-#     # print(f'Best match selected: {best_cand} with conf: {best_cand_conf}')
-#     return best_cand, best_cand_conf
-
-
-
 #Load individual camera trackings
 num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
 
 dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, cam,'gt', 'gt.txt')) for cam in CAM_NAMES]
 
 ##TODO: Load Neighbourhood
-adj_mat = np.array([[0, 1, 1, 1, 1],
-                    [1, 0, 1, 1, 1],
-                    [1, 1, 0, 1, 1],
-                    [1, 1, 1, 0, 1],
-                    [1, 1, 1, 1, 0]])
+# adj_mat = np.array([[0, 1, 1, 1, 1],
+#                     [1, 0, 1, 1, 1],
+#                     [1, 1, 0, 1, 1],
+#                     [1, 1, 1, 0, 1],
+#                     [1, 1, 1, 1, 0]])
+# adj_mat = np.array([[0, 1, 1, 1, 1, 1],
+#                     [1, 0, 1, 1, 1, 1],
+#                     [1, 1, 0, 1, 1, 1],
+#                     [1, 1, 1, 0, 1, 1],
+#                     [1, 1, 1, 1, 0, 1],
+#                     [1, 1, 1, 1, 1, 0]])
+adj_mat = utils.get_adj(SEQ)
+adj_mat = np.array([[0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1, 1, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 1],
+                    [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]])
 adj_mat = np.triu(adj_mat)
 
 #Sort by id
@@ -226,4 +209,4 @@ for cam in range(0, num_cams):
 
 for i, det in enumerate(dic_tracks_byframe):
     os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}',exist_ok=True)
-    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/hist_3d_hell.txt', det, True)
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/{METHOD}_hell.txt', det, True)
