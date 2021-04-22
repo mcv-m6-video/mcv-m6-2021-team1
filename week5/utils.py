@@ -10,12 +10,11 @@ from sklearn.metrics import average_precision_score
 from matplotlib import pyplot as plt
 import colorsys
 
-
-currentdir = os.path.dirname(os.path.realpath(__file__))
-parentdir = os.path.dirname(currentdir)
-sys.path.append(parentdir)
-import utils as w5utils
-from week3 import utils as w3utils
+# currentdir = os.path.dirname(os.path.realpath(__file__))
+# parentdir = os.path.dirname(currentdir)
+# sys.path.append(parentdir)
+# import utils as w5utils
+# from week3 import utils as w3utils
 
 color_id =  {}
 
@@ -462,6 +461,6 @@ def get_DET_path(sequence, camera, algorithm):
     return f"../data/aic19-track1-mtmc-train/train/S{sequence:02d}/c{camera:03d}/det/det_{algorithm}.txt"
 
 def gif_preprocess(im, width=512):
-    im = w3utils.resize_keep_ap(im, width=width)
+    im = resize_keep_ap(im, width=width)
     # im = cv2.cvtColor(im, cv2.COLOR_BGR2RGB)
     return im
