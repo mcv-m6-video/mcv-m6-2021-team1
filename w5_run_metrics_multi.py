@@ -57,7 +57,6 @@ Sequences of ground truth and test will be matched according to the `<SEQUENCE_X
 string.""", formatter_class=argparse.RawTextHelpFormatter)
 
     parser.add_argument('-s', '--sequence', type=int, default=-1, help="sequence")
-    parser.add_argument('-c', '--camera', type=int, default=-1, help="camera")
     parser.add_argument('-f', '--folder', type=str, default="../output_post", help="tracking folder")
     parser.add_argument('--loglevel', type=str, help='Log level', default='info')
     parser.add_argument('--fmt', type=str, help='Data format', default='mot15-2D')
@@ -84,7 +83,7 @@ def compare_dataframes(gts, ts):
 
 def main(args, sequence, cameras):
     # pylint: disable=missing-function-docstring
-    GT_PATHS = [get_GT_path(sequence, camera).replace("gt/gt.txt", "") for camera in cameras]
+    GT_PATHS = [get_GT_path(sequence, camera).replace("gt"+os.path.sep+"gt.txt", "") for camera in cameras]
     TR_PATHS = [get_TRACKING_path(sequence, camera, folder=args.folder) for camera in cameras]
 
     loglevel = getattr(logging, args.loglevel.upper(), None)
@@ -95,9 +94,10 @@ def main(args, sequence, cameras):
     if args.solver:
         mm.lap.default_solver = args.solver
 
-    gtfiles = [[glob.glob(os.path.join(GT_PATH, 'gt/gt.txt'))[0] for f in TR_PATH] for GT_PATH, TR_PATH in zip(GT_PATHS, TR_PATHS)]
+    print(GT_PATHS[0])
+    gtfiles = [[glob.glob(os.path.join(GT_PATH, 'gt','gt.txt'))[0] for f in TR_PATH] for GT_PATH, TR_PATH in zip(GT_PATHS, TR_PATHS)]
     tsfiles = [[f for f in glob.glob(os.path.join(TR_PATH, '*.txt')) if not os.path.basename(f).startswith('eval')] for TR_PATH in TR_PATHS]
-    gtfiles = list(zip(*[[glob.glob(os.path.join(GT_PATH, 'gt/gt.txt'))[0] for f in TR_PATH] for GT_PATH, TR_PATH in zip(GT_PATHS, TR_PATHS)]))
+    gtfiles = list(zip(*[[glob.glob(os.path.join(GT_PATH, 'gt','gt.txt'))[0] for f in TR_PATH] for GT_PATH, TR_PATH in zip(GT_PATHS, TR_PATHS)]))
     tsfiles = list(zip(*[[f for f in glob.glob(os.path.join(TR_PATH, '*.txt')) if not os.path.basename(f).startswith('eval')] for TR_PATH in TR_PATHS]))
     #print(gtfiles[1])
     #print(tsfiles[1])
@@ -141,9 +141,10 @@ def main(args, sequence, cameras):
 
 if __name__ == '__main__':
     args = parse_args()
-    sequence, camera = args.sequence, args.camera
+    sequence = args.sequence
 
     for (sequence, cameras) in VIDEOS_LIST:
         if args.sequence != -1 and args.sequence != sequence:
             continue
+        print(f"\nEvaluating sequence {sequence}...")
         main(args, sequence, cameras)

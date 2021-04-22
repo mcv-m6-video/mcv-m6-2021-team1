@@ -21,4 +21,16 @@ outputs/
 *out_visualizer/
 
 # Week 4
+<<<<<<< HEAD
 *output/w6gifs
+=======
+*output/
+
+# Week 5
+*.err
+*.out
+*.sbatch
+*.log
+*.png
+week5/logs
+>>>>>>> c4816f1012a6ac2e6a956c7afc67df7243853b95

@@ -23,6 +23,7 @@ import motmetrics as mm
 from week5.utils import get_GT_path, get_TRACKING_path
 
 VIDEOS_LIST = ((1, list(range(1,6))), (3, list(range(10,16))), (4, list(range(16,41))))
+VIDEOS_LIST = ((4, list(range(31,41))),)
 
 def parse_args():
     """Defines and parses command-line arguments."""

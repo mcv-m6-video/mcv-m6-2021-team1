@@ -7,19 +7,38 @@ import numpy as np
 import utils
 from torch import nn
 from matplotlib import pyplot as plt
+import sys
+sys.path.append("./TransReID")
+from TransReID.demo import *
+import torch
+import argparse
+
+
+parser = argparse.ArgumentParser(description='Post-process detections')
+parser.add_argument('-s', '--sequence', type=int)
+parser.add_argument('-m', '--method', type=str)
+args = parser.parse_args()
+
 
 ###CONGIF###
 
 # DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
-DATA_PATH = '/home/capiguri/code/datasets/m6data/'
-SEQ = 1
-METHOD = 'vgg16'
+# DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+# SEQ = 1
+# METHOD = 'vgg16'
+DATA_PATH = '/home/group01/M6/data/aic19-track1-mtmc-train'
+#DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+SEQ = args.sequence
+METHOD = args.method
+# OPTIONS: 'hist_3d', 'hist_rgb'
 
 ############
 
 FRAME_NUM_PATH = os.path.join(DATA_PATH, 'cam_framenum')
 TIMESTAMP_PATH = os.path.join(DATA_PATH, 'cam_timestamp')
 TRACK_PATH = os.path.join(DATA_PATH, f'train', f'S0{SEQ}')
+
+MODEL = None
 
 CAM_NAMES = []
 
@@ -58,6 +77,32 @@ def crop_bbox(cam, frame, bbox):
     cap_aux.release()
     return fr_im[bbox[1]:bbox[3], bbox[0]:bbox[2]]
 
+def transformer_match_intensive(query_data, cand_data):
+    global MODEL
+    if MODEL is None:
+        MODEL = load_model()
+
+    query_features = np.array([get_transformer_features(MODEL, crop_bbox(*query)) for query in query_data]).mean(axis=0)
+    cand_features = np.array([get_transformer_features(MODEL, crop_bbox(*cand)) for cand in cand_data]).mean(axis=0)
+    
+    distance = np.linalg.norm(query_features - cand_features)
+    return -distance
+
+
+def transformer_match(query_data, cand_data):
+    global MODEL
+    if MODEL is None:
+        MODEL = load_model()
+
+    query_im = crop_bbox(*query_data[0])
+    cand_im = crop_bbox(*cand_data[0])
+    
+    query_features = get_transformer_features(MODEL, query_im)
+    cand_features = get_transformer_features(MODEL, query_im)
+
+    distance = np.linalg.norm(query_features - cand_features)
+    return -distance
+
 def hist_rgb_match(query_data, cand_data):
 
     query_im = crop_bbox(*query_data[0])
@@ -74,17 +119,21 @@ def hist_rgb_match(query_data, cand_data):
     return conf
 
 def hist_3d_match(query_data, cand_data):
+    bins = 8
 
     query_im = crop_bbox(*query_data[0])
     cand_im = crop_bbox(*cand_data[0])
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2Lab)
     # preferential number of bins for each channel based on experimental results
-    hist = cv2.calcHist([image], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
-    hist = cv2.normalize(hist, hist)
-    hist.flatten()
+    h1 = cv2.calcHist([query_im], [0, 1, 2], None, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    h2 = cv2.calcHist([cand_im], [0, 1, 2], None, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
 
-    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
+    h1 = cv2.normalize(h1, h1)
+    h1.flatten()
+    h2 = cv2.normalize(h2, h2)
+    h2.flatten()
+
+    conf = 1 - cv2.compareHist(h1, h2, cv2.HISTCMP_HELLINGER)
 
     return conf
 
@@ -123,6 +172,10 @@ def match_tracks(query, query_cam, candidates, candidates_cam, dic_data, method)
 
             if conf  < 0.46:
                 conf = 0
+        elif method == 'transformer':
+            conf = transformer_match(query_data, cand_data)
+        elif method == 'transformer_intensive':
+            conf = transformer_match_intensive(query_data, cand_data)
         else:
             continue
 
@@ -140,14 +193,8 @@ num_cams = sum(1 for line in open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')))
 
 dic_tracks_byframe = [utils.parse_aicity_rects(os.path.join(TRACK_PATH, cam,'gt', 'gt.txt')) for cam in CAM_NAMES]
 
-##TODO: Load Neighbourhood
-# Seq 1
-adj_mat = np.array([[0, 1, 1, 1, 1],
-                    [1, 0, 1, 1, 1],
-                    [1, 1, 0, 1, 1],
-                    [1, 1, 1, 0, 1],
-                    [1, 1, 1, 1, 0]])
-adj_mat = np.triu(adj_mat)
+##Load Neighbourhood
+adj_mat = utils.get_adj(SEQ)
 
 # seq 3
 # adj_mat = np.array([[0, 1, 1, 1, 1, 1],

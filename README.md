@@ -1,4 +1,4 @@
-# MCV-M6-Video-Analysis
+# Video Surveillance for Road Traffic Monitoring (MCV-M6-Video-Analysis)
 
 # Team 1
 
@@ -9,100 +9,53 @@
 | Carmen García    | carmen.garciano@e-campus.uab.cat  |
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
-# Week 4
+Project presentation: [Google Slides](https://docs.google.com/presentation/d/1FcZ90pkM3YXFWxmWFEbWw7z9L7LiFYNIy9Z9eVy9m_s/edit?usp=sharing)
 
-### 1.1 Compute optical flow
+# Index of contents
+The contents of this repository are structured following a temporal line throughout the 5 weekly tasks we have been working on.
 
-The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
-   - exhaustive search
-   - three step search
+### [Week 1](#week1)  - Introduction to the project
+### [Week 2](#week2)  - Background estimation
+### [Week 3](#week3)  - Detection and Tracking
+### [Week 4](#week4)  - Optical flow, Video Stabilization and Tracking
+### [Week 5](#week5)  - Multi-target multi-camera Tracking
 
-The code for generating the visualizations in the slides is provided in `visualize_block_matching.py`
 
-### 1.2. Off-the-shelf Optical Flow
+# <a name="week1"></a> Week1
 
-The followin algorithm have been tested:
-   -PyFlow 
-   -Lucas-Kanade
-   -Farneback
-   -SimpleFlow
-   
- The scripts to perform optical flow are in week4/opticalflow/pyflow. If you run any of them, you get running time, MSE, PEPN on the terminal and the optical flow representation is displayed. 
- 
+## Tasks 1 and 2
+Tasks 1.1, 1.2 and 2 are implemented between the files `main.py` and `utils.py`. 
 
-### 2.1. Video Stabilization with Block Matching
-The algorithm for video stabilization is based on a simple traslational model. To stabilize a video, call week4/stabilization.py with the following arguments:
-```
-usage: stabilization.py [-h] -v VIDEO [-t {median,gaussian}] [-s KERNEL_SIZE] [-d] [-a] [-m MEMORY]
+Detection file, noise configuration and visualization options are chosen by cmd command. Despite that, some important "global" variables are:
+
+`VIDEO_PATH` = *path to vdo.avi*
+`ANNOTATIONS_FILE` = *path to annotations.xml with complete ground truth data (including still objects, bikes and cars)*
+
+This file can be parsed with the function utils.parse_xml_rects
+
+`DET_PATH` = *path to AICity detection data*
+
+This file can be parsed with the function utils.parse_aicity_rects. Path to rcnn, yolo and ssd detections already on the script. Select using the option: mode.
+
+````
+$ python main.py -h
+usage: main.py [-h] -m MODE -n NAME [-d] [-s] [--noise NOISE]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -v VIDEO, --video VIDEO
-                        Name of the video to stabilize. Must be an avi store in ../..
-  -t {median,gaussian}, --kernel-type {median,gaussian}
-                        Type of smoothing filter
-  -s KERNEL_SIZE, --kernel-size KERNEL_SIZE
-                        Size of the smoothing kernel
-  -d, --display         Wheter to display frames s they are being processed or not
-  -a, --angle           Wheter to try to compensate angles (not recommended)
-  -m MEMORY, --memory MEMORY
-                        Size of the accumulated memory
-```
-An output video will be generated on output/ with the following naming convention:
-```python
-outname = f'output/out{videoname}_mem{memory}_typ{kernel_type}_ker{kernel_size}_angle_{use_angle}.avi'
-```
-
-### 2.2. Off-the-shelf Video Stabilization
-
- The following algorithms have been tested:
-   -VidStab (script in week4/vidstab/vidstab_script.py): input and output video path are hardcoded. This script also plots trajectory and transform graphs.
-   ```
-$ python vidstab_script.py
-   
-   ```
-   -Video Stabilization Using Point Feature Matching in OpenCV (script in week4/vidstab/VideoStabilization/video_stabilization.py): input and output video path are hardcoded.
-   
- ```
-$ python video_stabilization.py
- ```
-   
- We also attempted:
-   - [Futsa](https://alex04072000.github.io/FuSta/)
-   - [Real-Time-Video-Stabilization](https://github.com/Lakshya-Kejriwal/Real-Time-Video-Stabilization)
-  
- But ultimately, we did not manage to make them work correctly.
-
-
-### 3.1. Tracking with optical flow
-The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
-````
-$ python w3_run_kalman.py -h
-usage    w3_run_kalman.py [-h] [-o OUTPUT] [-d DETECTIONS] [-t TRACKER]
-                        [-th THRESHOLD] [-tl TRACKER_LIFE] [-M MAX]
-
-optional arguments:optional arguments:
-  -h, --help            show this help message and exit
-  -o OUTPUT, --output OUTPUT
-                        where results will be saved
-  -d DETECTIONS, --detections DETECTIONS
-                        detections used for tracking. Options: {retinanetpre, retinanet101pre, maskrcnnpre, ssdpre, yolopre}
-  -t TRACKER, --tracker TRACKER
-                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean", "medianflow"}
-  -th THRESHOLD, --threshold THRESHOLD
-                        threshold used to filter detections
-  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
-                        tracker life
-  -m MIN, --min MIN     number of frame to start the tracker (by default it runs from the beginning of the video).
-                        Set to '-1' by default.
-  -M MAX, --max MAX     number of frames to finish the tracking (by default it runs until the end of the video).
-                        Set to '-1' by default.
-
+  -m MODE, --mode MODE  yolo, rcnn or ssd
+  -n NAME, --name NAME  Storage older name
+  -d, --display         Whether to display the video or not
+  -s, --save            Wheter to save frames and graphics for each of them or not
+  --noise NOISE         Noise addition configuration. Format drop-pos-size-ar
 ````
 
-The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
+## Tasks 3 and 4
+The tasks are implemented in jupyter notebooks with their corresponding name.
 
-# <a name="w3"></a> Week 3
+
+
+# <a name="week3"/> <a name="w3"></a> Week 3
 
 ## Requirements
 Apart from the packages on requirements.txt. you must follow the instructions on [this link](https://github.com/LucaCappelletti94/pygifsicle) for installing pygifsicle (used for reducing gif size).
@@ -265,7 +218,102 @@ Layout for test data
 ```
 Ground truth and detection is matched according to SEQUENCE_X. Results are displayed on the console.
 
-# <a name="w1"></a> Week 2
+
+
+# <a name="week4"/> Week 4
+
+### 1.1 Compute optical flow
+
+The implementation and sample usage of block matching optical flow can is provided in the file `block_match.py`. It includes
+   - exhaustive search
+   - three step search
+
+The code for generating the visualizations in the slides is provided in `visualize_block_matching.py`
+
+### 1.2. Off-the-shelf Optical Flow
+
+The followin algorithm have been tested:
+   -PyFlow 
+   -Lucas-Kanade
+   -Farneback
+   -SimpleFlow
+   
+ The scripts to perform optical flow are in week4/opticalflow/pyflow. If you run any of them, you get running time, MSE, PEPN on the terminal and the optical flow representation is displayed. 
+ 
+
+### 2.1. Video Stabilization with Block Matching
+The algorithm for video stabilization is based on a simple traslational model. To stabilize a video, call week4/stabilization.py with the following arguments:
+```
+usage: stabilization.py [-h] -v VIDEO [-t {median,gaussian}] [-s KERNEL_SIZE] [-d] [-a] [-m MEMORY]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -v VIDEO, --video VIDEO
+                        Name of the video to stabilize. Must be an avi store in ../..
+  -t {median,gaussian}, --kernel-type {median,gaussian}
+                        Type of smoothing filter
+  -s KERNEL_SIZE, --kernel-size KERNEL_SIZE
+                        Size of the smoothing kernel
+  -d, --display         Wheter to display frames s they are being processed or not
+  -a, --angle           Wheter to try to compensate angles (not recommended)
+  -m MEMORY, --memory MEMORY
+                        Size of the accumulated memory
+```
+An output video will be generated on output/ with the following naming convention:
+```python
+outname = f'output/out{videoname}_mem{memory}_typ{kernel_type}_ker{kernel_size}_angle_{use_angle}.avi'
+```
+
+### 2.2. Off-the-shelf Video Stabilization
+
+ The following algorithms have been tested:
+   -VidStab (script in week4/vidstab/vidstab_script.py): input and output video path are hardcoded. This script also plots trajectory and transform graphs.
+   ```
+$ python vidstab_script.py
+   
+   ```
+   -Video Stabilization Using Point Feature Matching in OpenCV (script in week4/vidstab/VideoStabilization/video_stabilization.py): input and output video path are hardcoded.
+   
+ ```
+$ python video_stabilization.py
+ ```
+   
+ We also attempted:
+   - [Futsa](https://alex04072000.github.io/FuSta/)
+   - [Real-Time-Video-Stabilization](https://github.com/Lakshya-Kejriwal/Real-Time-Video-Stabilization)
+  
+ But ultimately, we did not manage to make them work correctly.
+
+
+### 3.1. Tracking with optical flow
+The extension of the IOU tracker with optical flow has been implemented in the same architecture built for Week 3 tracking tasks. Therefore, trackers can be executed with the same script, specifying TRACKER to "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean" or "medianflow".
+````
+$ python w3_run_kalman.py -h
+usage    w3_run_kalman.py [-h] [-o OUTPUT] [-d DETECTIONS] [-t TRACKER]
+                        [-th THRESHOLD] [-tl TRACKER_LIFE] [-M MAX]
+
+optional arguments:optional arguments:
+  -h, --help            show this help message and exit
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -d DETECTIONS, --detections DETECTIONS
+                        detections used for tracking. Options: {retinanetpre, retinanet101pre, maskrcnnpre, ssdpre, yolopre}
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "flow_LK_median", "flow_LK_mean", "flow_GF_median", "flow_GF_mean", "medianflow"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life
+  -m MIN, --min MIN     number of frame to start the tracker (by default it runs from the beginning of the video).
+                        Set to '-1' by default.
+  -M MAX, --max MAX     number of frames to finish the tracking (by default it runs until the end of the video).
+                        Set to '-1' by default.
+
+````
+
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
+
+# <a name="week2"/> Week 2
 
 ## Runner
 All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
@@ -309,35 +357,70 @@ optional arguments:
 There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
 
 
-# <a name="w1"></a> Week1
 
-## Tasks 1 and 2
-Tasks 1.1, 1.2 and 2 are implemented between the files `main.py` and `utils.py`. 
+# <a name="week5"/> Week 5
 
-Detection file, noise configuration and visualization options are chosen by cmd command. Despite that, some important "global" variables are:
+The implementation of this week have been split into two well divided parts:
 
-`VIDEO_PATH` = *path to vdo.avi*
-`ANNOTATIONS_FILE` = *path to annotations.xml with complete ground truth data (including still objects, bikes and cars)*
+## 1. Multi-target single-camera (MTSC) tracking
 
-This file can be parsed with the function utils.parse_xml_rects
-
-`DET_PATH` = *path to AICity detection data*
-
-This file can be parsed with the function utils.parse_aicity_rects. Path to rcnn, yolo and ssd detections already on the script. Select using the option: mode.
+The interface of the script used in previous weeks was adapted to this week's. Now, the usage is:
 
 ````
-$ python main.py -h
-usage: main.py [-h] -m MODE -n NAME [-d] [-s] [--noise NOISE]
+$ python w5_run_mtsc.py -h
+usage    w5_run_mtsc.py [-h] [-s SEQUENCE] [-c CAMERA] [-d DETECTIONS]
+                      [-o OUTPUT] [-t TRACKER] [-th THRESHOLD]
+                      [-tl TRACKER_LIFE] [-v] [-M MAX] [-m MIN]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -m MODE, --mode MODE  yolo, rcnn or ssd
-  -n NAME, --name NAME  Storage older name
-  -d, --display         Whether to display the video or not
-  -s, --save            Wheter to save frames and graphics for each of them or not
-  --noise NOISE         Noise addition configuration. Format drop-pos-size-ar
+  -s SEQUENCE, --sequence SEQUENCE
+                        sequence to be run
+  -c CAMERA, --camera CAMERA
+                        camera to be run
+  -d DETECTIONS, --detections DETECTIONS
+                        detections to use for the tracker
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "medianflow"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life in number of frames
+  -v, --video           if true, it saves a video with the visual results instead of the annotations
+  -M MAX, --max MAX     max number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
+  -m MIN, --min MIN     min number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
 ````
 
-## Tasks 3 and 4
-The tasks are implemented in jupyter notebooks with their corresponding name.
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated if specified.
+This week, we also implemented several post-processing functions to filter the highest number of detections which are not considered in the ground truth and make the comparison fairer. This can be applied to the folder which generates the previous script by running:
+
+ ```
+$ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
+ ```
+ 
+ ## 2. Single-camera evaluation
+ 
+ Now, the output folder can be evaluated using the script of single evaluation:
+
+ ```
+$ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
+ 
+ ## Multi-target multi-camera (MTMC) tracking
+ 
+ ## Multi-camera evaluation
+ 
+ Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
+
+ ```
+$ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
 
