@@ -16,75 +16,43 @@
 [Week4](#week4)  
 [Week5](#week5)  
 
-# Week 5
-<a name="week5"/>
 
-The implementation of this week have been split into two well divided parts:
+# <a name="week1"></a> Week1
 
-## 1. Multi-target single-camera (MTSC) tracking
+## Tasks 1 and 2
+Tasks 1.1, 1.2 and 2 are implemented between the files `main.py` and `utils.py`. 
 
-The interface of the script used in previous weeks was adapted to this week's. Now, the usage is:
+Detection file, noise configuration and visualization options are chosen by cmd command. Despite that, some important "global" variables are:
+
+`VIDEO_PATH` = *path to vdo.avi*
+`ANNOTATIONS_FILE` = *path to annotations.xml with complete ground truth data (including still objects, bikes and cars)*
+
+This file can be parsed with the function utils.parse_xml_rects
+
+`DET_PATH` = *path to AICity detection data*
+
+This file can be parsed with the function utils.parse_aicity_rects. Path to rcnn, yolo and ssd detections already on the script. Select using the option: mode.
 
 ````
-$ python w5_run_mtsc.py -h
-usage    w5_run_mtsc.py [-h] [-s SEQUENCE] [-c CAMERA] [-d DETECTIONS]
-                      [-o OUTPUT] [-t TRACKER] [-th THRESHOLD]
-                      [-tl TRACKER_LIFE] [-v] [-M MAX] [-m MIN]
+$ python main.py -h
+usage: main.py [-h] -m MODE -n NAME [-d] [-s] [--noise NOISE]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -s SEQUENCE, --sequence SEQUENCE
-                        sequence to be run
-  -c CAMERA, --camera CAMERA
-                        camera to be run
-  -d DETECTIONS, --detections DETECTIONS
-                        detections to use for the tracker
-  -o OUTPUT, --output OUTPUT
-                        where results will be saved
-  -t TRACKER, --tracker TRACKER
-                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "medianflow"}
-  -th THRESHOLD, --threshold THRESHOLD
-                        threshold used to filter detections
-  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
-                        tracker life in number of frames
-  -v, --video           if true, it saves a video with the visual results instead of the annotations
-  -M MAX, --max MAX     max number of frames to run the tracker (by default it
-                        runs all video). Set to '-1' by default.
-  -m MIN, --min MIN     min number of frames to run the tracker (by default it
-                        runs all video). Set to '-1' by default.
+  -m MODE, --mode MODE  yolo, rcnn or ssd
+  -n NAME, --name NAME  Storage older name
+  -d, --display         Whether to display the video or not
+  -s, --save            Wheter to save frames and graphics for each of them or not
+  --noise NOISE         Noise addition configuration. Format drop-pos-size-ar
 ````
 
-The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated if specified.
-This week, we also implemented several post-processing functions to filter the highest number of detections which are not considered in the ground truth and make the comparison fairer. This can be applied to the folder which generates the previous script by running:
+## Tasks 3 and 4
+The tasks are implemented in jupyter notebooks with their corresponding name.
 
- ```
-$ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
- ```
- 
- ## 2. Single-camera evaluation
- 
- Now, the output folder can be evaluated using the script of single evaluation:
 
- ```
-$ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
- ```
- 
- Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
- 
- ## Multi-target multi-camera (MTMC) tracking
- 
- ## Multi-camera evaluation
- 
- Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
 
- ```
-$ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
- ```
- 
- Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
 
-# Week 4
-<a name="week4"/>
+<a name="week4"/># Week 4
 
 ### 1.1 Compute optical flow
 
@@ -177,8 +145,51 @@ optional arguments:optional arguments:
 
 The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated.
 
-# <a name="w3"></a> Week 3
-<a name="week3"/>
+<a name="week2"/># <a name="w1"></a> Week 2
+
+## Runner
+All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
+
+## Sript Usage
+
+The models available include
+- GaussianModel -> 'gm'
+- AdaptiveGM -> 'agm'
+- SOTA -> 'sota', and select which one to use with "--method" argument to the parser
+
+````
+$ python week2/main.py -h
+usage: main.py [-h] [-m {gm,agm,sota}] [-c {gray,rgb,hsv,lab,ycrcb}] [-M MAX] [-perc PERCENTAGE] 
+               [-a N [N ...]] [-p P] [-d] [-meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}]
+
+Extract foreground from video.
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -m {gm,agm,sota}, --model {gm,agm,sota}
+                        The model used for background modeling. Default value is 'gm':Gaussian.
+  -c {gray,rgb,hsv,lab,ycrcb}, --colorspace {gray,rgb,hsv,lab,ycrcb}
+                        choose the colorspace used for background modeling. 
+                        Default value is 'gray.
+  -M MAX, --max MAX     max number of frames for which to extract foreground. 
+                        Set to '-1' by default, which means take all the frames available.
+  -perc PERCENTAGE, --percentage PERCENTAGE
+                        percentage of video to use for background modeling
+  -a N [N ...], --alpha N [N ...]
+                        alpha value or values depending on color space used for modelling
+  -p P, --p P           Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion 
+                        of new information to model
+  -d, --display         to display frames as they are processed
+  -meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}, --method {mog,mog2,lsbp,gmg,cnt,gsoc,knn}
+                        SOTA algorithm used for background subtraction. 
+                        The '--model' parameter has to be set to 'sota' to be able to use this.
+````
+
+## Random/Grid search
+There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
+
+
+<a name="week3"/># <a name="w3"></a> Week 3
 
 ## Requirements
 Apart from the packages on requirements.txt. you must follow the instructions on [this link](https://github.com/LucaCappelletti94/pygifsicle) for installing pygifsicle (used for reducing gif size).
@@ -341,80 +352,70 @@ Layout for test data
 ```
 Ground truth and detection is matched according to SEQUENCE_X. Results are displayed on the console.
 
-# <a name="w1"></a> Week 2
-<a name="week2"/>
 
-## Runner
-All tasks were implemented in `main.py`. The algorithm will either pre-compute the background modelling or load it if it has already been computed before and saved in the `checkpoints` folder. The algorithm will output a .mp4 video file with the result and a gif of the first 200 frame for visualization purposes. The different algorithms can be selected by playing with the scripts parameters:
+<a name="week5"/># Week 5
 
-## Sript Usage
+The implementation of this week have been split into two well divided parts:
 
-The models available include
-- GaussianModel -> 'gm'
-- AdaptiveGM -> 'agm'
-- SOTA -> 'sota', and select which one to use with "--method" argument to the parser
+## 1. Multi-target single-camera (MTSC) tracking
+
+The interface of the script used in previous weeks was adapted to this week's. Now, the usage is:
 
 ````
-$ python week2/main.py -h
-usage: main.py [-h] [-m {gm,agm,sota}] [-c {gray,rgb,hsv,lab,ycrcb}] [-M MAX] [-perc PERCENTAGE] 
-               [-a N [N ...]] [-p P] [-d] [-meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}]
-
-Extract foreground from video.
+$ python w5_run_mtsc.py -h
+usage    w5_run_mtsc.py [-h] [-s SEQUENCE] [-c CAMERA] [-d DETECTIONS]
+                      [-o OUTPUT] [-t TRACKER] [-th THRESHOLD]
+                      [-tl TRACKER_LIFE] [-v] [-M MAX] [-m MIN]
 
 optional arguments:
   -h, --help            show this help message and exit
-  -m {gm,agm,sota}, --model {gm,agm,sota}
-                        The model used for background modeling. Default value is 'gm':Gaussian.
-  -c {gray,rgb,hsv,lab,ycrcb}, --colorspace {gray,rgb,hsv,lab,ycrcb}
-                        choose the colorspace used for background modeling. 
-                        Default value is 'gray.
-  -M MAX, --max MAX     max number of frames for which to extract foreground. 
-                        Set to '-1' by default, which means take all the frames available.
-  -perc PERCENTAGE, --percentage PERCENTAGE
-                        percentage of video to use for background modeling
-  -a N [N ...], --alpha N [N ...]
-                        alpha value or values depending on color space used for modelling
-  -p P, --p P           Rho (p): [AdaptiveGaussianModel] parameter controlling the inclusion 
-                        of new information to model
-  -d, --display         to display frames as they are processed
-  -meth {mog,mog2,lsbp,gmg,cnt,gsoc,knn}, --method {mog,mog2,lsbp,gmg,cnt,gsoc,knn}
-                        SOTA algorithm used for background subtraction. 
-                        The '--model' parameter has to be set to 'sota' to be able to use this.
+  -s SEQUENCE, --sequence SEQUENCE
+                        sequence to be run
+  -c CAMERA, --camera CAMERA
+                        camera to be run
+  -d DETECTIONS, --detections DETECTIONS
+                        detections to use for the tracker
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "medianflow"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life in number of frames
+  -v, --video           if true, it saves a video with the visual results instead of the annotations
+  -M MAX, --max MAX     max number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
+  -m MIN, --min MIN     min number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
 ````
 
-## Random/Grid search
-There is a folder specific for this with the hyperparameters search runner and the visualizer of the results (3D plot). We did not have time to implement an usable interface for this script and the parameters to try are hardcoded inside the script, as well as the main function, which was copied from the main runner.
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated if specified.
+This week, we also implemented several post-processing functions to filter the highest number of detections which are not considered in the ground truth and make the comparison fairer. This can be applied to the folder which generates the previous script by running:
 
+ ```
+$ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
+ ```
+ 
+ ## 2. Single-camera evaluation
+ 
+ Now, the output folder can be evaluated using the script of single evaluation:
 
-# <a name="week1"></a> Week1
+ ```
+$ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
+ 
+ ## Multi-target multi-camera (MTMC) tracking
+ 
+ ## Multi-camera evaluation
+ 
+ Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
 
-## Tasks 1 and 2
-Tasks 1.1, 1.2 and 2 are implemented between the files `main.py` and `utils.py`. 
-
-Detection file, noise configuration and visualization options are chosen by cmd command. Despite that, some important "global" variables are:
-
-`VIDEO_PATH` = *path to vdo.avi*
-`ANNOTATIONS_FILE` = *path to annotations.xml with complete ground truth data (including still objects, bikes and cars)*
-
-This file can be parsed with the function utils.parse_xml_rects
-
-`DET_PATH` = *path to AICity detection data*
-
-This file can be parsed with the function utils.parse_aicity_rects. Path to rcnn, yolo and ssd detections already on the script. Select using the option: mode.
-
-````
-$ python main.py -h
-usage: main.py [-h] -m MODE -n NAME [-d] [-s] [--noise NOISE]
-
-optional arguments:
-  -h, --help            show this help message and exit
-  -m MODE, --mode MODE  yolo, rcnn or ssd
-  -n NAME, --name NAME  Storage older name
-  -d, --display         Whether to display the video or not
-  -s, --save            Wheter to save frames and graphics for each of them or not
-  --noise NOISE         Noise addition configuration. Format drop-pos-size-ar
-````
-
-## Tasks 3 and 4
-The tasks are implemented in jupyter notebooks with their corresponding name.
+ ```
+$ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
 
