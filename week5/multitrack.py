@@ -7,10 +7,11 @@ from matplotlib import pyplot as plt
 
 ###CONGIF###
 
-# DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
-DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+#DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
-METHOD = 'hist_rgb'
+METHOD = 'hist_3d'
+# OPTIONS: 'hist_3d', 'hist_rgb'
 
 ############
 
@@ -50,9 +51,10 @@ def hist_3d_match(query_data, cand_data):
     query_im = crop_bbox(*query_data[0])
     cand_im = crop_bbox(*cand_data[0])
 
-    image = cv2.cvtColor(image, cv2.COLOR_BGR2Lab)
     # preferential number of bins for each channel based on experimental results
-    hist = cv2.calcHist([image], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    h1 = cv2.calcHist([query_im], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    h2 = cv2.calcHist([cand_im], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+
     hist = cv2.normalize(hist, hist)
     hist.flatten()
 
@@ -221,4 +223,4 @@ for cam in range(0, num_cams):
 
 for i, det in enumerate(dic_tracks_byframe):
     os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}',exist_ok=True)
-    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/hist_rgb_hell.txt', det, True)
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/hist_3d_hell.txt', det, True)
