@@ -32,30 +32,31 @@ def crop_bbox(cam, frame, bbox):
 
 def hist_rgb_match(query_data, cand_data):
 
-
     query_im = crop_bbox(*query_data[0])
     cand_im = crop_bbox(*cand_data[0])
-
-    # cv2.imshow('im_query', query_im)
-    # cv2.imshow(f'candidate', cand_im)
-    # cv2.waitKey(0)
-
-    # print(np.vstack([cv2.calcHist([query_im],[i],None,[256],[0,256]) for i in range(3)]).shape)
 
     H1 = np.vstack([cv2.calcHist([query_im],[i],None,[256],[0,256]) for i in range(3)])
     H2 = np.vstack([cv2.calcHist([cand_im],[i],None,[256],[0,256]) for i in range(3)])
 
-    # plt.plot(H1,color = 'b')
-    # plt.plot(H2,color = 'r')
-
     H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
     H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
 
-    conf = cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
-     
-    # plt.title(conf)
-    # plt.xlim([0,256*3])
-    # plt.show()
+    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
+
+    return conf
+
+def hist_3d_match(query_data, cand_data):
+
+    query_im = crop_bbox(*query_data[0])
+    cand_im = crop_bbox(*cand_data[0])
+
+    image = cv2.cvtColor(image, cv2.COLOR_BGR2Lab)
+    # preferential number of bins for each channel based on experimental results
+    hist = cv2.calcHist([image], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    hist = cv2.normalize(hist, hist)
+    hist.flatten()
+
+    conf = cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
 
     return conf
 
