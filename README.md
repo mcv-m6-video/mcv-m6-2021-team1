@@ -9,15 +9,16 @@
 | Carmen García    | carmen.garciano@e-campus.uab.cat  |
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
+Project presentation: [Google Slides](https://docs.google.com/presentation/d/1FcZ90pkM3YXFWxmWFEbWw7z9L7LiFYNIy9Z9eVy9m_s/edit?usp=sharing)
 
 # Index of contents
 The contents of this repository are structured following a temporal line throughout the 5 weekly tasks we have been working on.
 
-### [Week1](#week1)  - Introduction to the project
-### [Week2](#week2)  - Background estimation
-### [Week3](#week3)  - Detection and Tracking
-### [Week4](#week4)  - Optical flow, Video Stabilization and Tracking
-### [Week5](#week5)  - Multi-target multi-camera Tracking
+### [Week 1](#week1)  - Introduction to the project
+### [Week 2](#week2)  - Background estimation
+### [Week 3](#week3)  - Detection and Tracking
+### [Week 4](#week4)  - Optical flow, Video Stabilization and Tracking
+### [Week 5](#week5)  - Multi-target multi-camera Tracking
 
 
 # <a name="week1"></a> Week1
