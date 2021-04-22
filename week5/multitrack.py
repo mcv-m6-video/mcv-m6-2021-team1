@@ -47,18 +47,21 @@ def hist_rgb_match(query_data, cand_data):
     return conf
 
 def hist_3d_match(query_data, cand_data):
+    bins = 8
 
     query_im = crop_bbox(*query_data[0])
     cand_im = crop_bbox(*cand_data[0])
 
     # preferential number of bins for each channel based on experimental results
-    h1 = cv2.calcHist([query_im], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
-    h2 = cv2.calcHist([cand_im], [0, 1, 2], mask, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    h1 = cv2.calcHist([query_im], [0, 1, 2], None, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
+    h2 = cv2.calcHist([cand_im], [0, 1, 2], None, [int(bins/4), 3*bins, 3*bins], [0, 256, 0, 256, 0, 256])
 
-    hist = cv2.normalize(hist, hist)
-    hist.flatten()
+    h1 = cv2.normalize(h1, h1)
+    h1.flatten()
+    h2 = cv2.normalize(h2, h2)
+    h2.flatten()
 
-    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
+    conf = 1 - cv2.compareHist(h1, h2, cv2.HISTCMP_HELLINGER)
 
     return conf
 
