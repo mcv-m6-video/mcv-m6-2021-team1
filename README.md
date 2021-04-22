@@ -1,4 +1,4 @@
-# MCV-M6-Video-Analysis
+# Video Surveillance for Road Traffic Monitoring (MCV-M6-Video-Analysis)
 
 # Team 1
 
@@ -10,11 +10,14 @@
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
 
-[Week1](#week1)  
-[Week2](#week2)  
-[Week3](#week3)  
-[Week4](#week4)  
-[Week5](#week5)  
+# Index of contents
+The contents of this repository are structured following a temporal line throughout the 5 weekly tasks we have been working on.
+
+### [Week1](#week1)  - Introduction to the project
+### [Week2](#week2)  - Background estimation
+### [Week3](#week3)  - Detection and Tracking
+### [Week4](#week4)  - Optical flow, Video Stabilization and Tracking
+### [Week5](#week5)  - Multi-target multi-camera Tracking
 
 
 # <a name="week1"></a> Week1
@@ -51,7 +54,7 @@ The tasks are implemented in jupyter notebooks with their corresponding name.
 
 
 
-#<a name="week3"/> <a name="w3"></a> Week 3
+# <a name="week3"/> <a name="w3"></a> Week 3
 
 ## Requirements
 Apart from the packages on requirements.txt. you must follow the instructions on [this link](https://github.com/LucaCappelletti94/pygifsicle) for installing pygifsicle (used for reducing gif size).
