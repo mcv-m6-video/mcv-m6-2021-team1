@@ -9,6 +9,73 @@
 | Carmen García    | carmen.garciano@e-campus.uab.cat  |
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
+
+# Week 5
+
+The implementation of this week have been split into two well divided parts:
+
+## 1. Multi-target single-camera (MTSC) tracking
+
+The interface of the script used in previous weeks was adapted to this week's. Now, the usage is:
+
+````
+$ python w5_run_mtsc.py -h
+usage    w5_run_mtsc.py [-h] [-s SEQUENCE] [-c CAMERA] [-d DETECTIONS]
+                      [-o OUTPUT] [-t TRACKER] [-th THRESHOLD]
+                      [-tl TRACKER_LIFE] [-v] [-M MAX] [-m MIN]
+
+optional arguments:
+  -h, --help            show this help message and exit
+  -s SEQUENCE, --sequence SEQUENCE
+                        sequence to be run
+  -c CAMERA, --camera CAMERA
+                        camera to be run
+  -d DETECTIONS, --detections DETECTIONS
+                        detections to use for the tracker
+  -o OUTPUT, --output OUTPUT
+                        where results will be saved
+  -t TRACKER, --tracker TRACKER
+                        tracker used. Options: {"kalman", "kcf", "siamrpn_mobile", "siammask", "medianflow"}
+  -th THRESHOLD, --threshold THRESHOLD
+                        threshold used to filter detections
+  -tl TRACKER_LIFE, --tracker_life TRACKER_LIFE
+                        tracker life in number of frames
+  -v, --video           if true, it saves a video with the visual results instead of the annotations
+  -M MAX, --max MAX     max number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
+  -m MIN, --min MIN     min number of frames to run the tracker (by default it
+                        runs all video). Set to '-1' by default.
+````
+
+The txt file with the results will be stored for posterior evaluation. A video with the tracking visual results will also be generated if specified.
+This week, we also implemented several post-processing functions to filter the highest number of detections which are not considered in the ground truth and make the comparison fairer. This can be applied to the folder which generates the previous script by running:
+
+ ```
+$ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
+ ```
+ 
+ ## Single-camera evaluation
+ 
+ Now, the output folder can be evaluated using the script of single evaluation:
+
+ ```
+$ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
+ 
+ ## Multi-target multi-camera (MTMC) tracking
+ 
+ ## Multi-camera evaluation
+ 
+ Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
+
+ ```
+$ python w5_run_metrics_multiple.py -s SEQUENCE -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
+
 # Week 4
 
 ### 1.1 Compute optical flow
