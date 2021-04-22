@@ -7,8 +7,8 @@ from matplotlib import pyplot as plt
 
 ###CONGIF###
 
-DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
-# DATA_PATH = '/home/capiguri/code/datasets/m6data/'
+# DATA_PATH = 'C:\\Users\\Carmen\\CVMaster\\M6\\aic19-track1-mtmc-train'
+DATA_PATH = '/home/capiguri/code/datasets/m6data/'
 SEQ = 1
 METHOD = 'hist_rgb'
 
@@ -41,7 +41,7 @@ def hist_rgb_match(query_data, cand_data):
     H1 = cv2.normalize(H1, H1, norm_type=cv2.NORM_L2)
     H2 = cv2.normalize(H2, H2, norm_type=cv2.NORM_L2)
 
-    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_INTERSECT)
+    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
 
     return conf
 
@@ -56,7 +56,7 @@ def hist_3d_match(query_data, cand_data):
     hist = cv2.normalize(hist, hist)
     hist.flatten()
 
-    conf = cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
+    conf = 1 - cv2.compareHist(H1, H2, cv2.HISTCMP_HELLINGER)
 
     return conf
 
@@ -174,11 +174,12 @@ with open(os.path.join(FRAME_NUM_PATH, f'S0{SEQ}.txt')) as f:
 mt_cont = 0
 for cam in range(0, num_cams):
     print(f'Matching camera {cam}')
+
     ##Update mt for myself
     for key_query, element_query in dic_tracks[cam].items():
         for fr_instance in element_query:
             for el_t in dic_tracks_byframe[cam][f'f_{fr_instance}']:
-                if el_t['mt_id'] == -1:
+                if el_t['id'] == key_query and el_t['mt_id'] == -1:
                     el_t['mt_id'] = mt_cont
         mt_cont+=1
     
@@ -220,4 +221,4 @@ for cam in range(0, num_cams):
 
 for i, det in enumerate(dic_tracks_byframe):
     os.makedirs(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}',exist_ok=True)
-    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/random.txt', det, True)
+    utils.save_aicity_rects(f'./mtrackings/S{str(SEQ).zfill(2)}/{str(CAM_NAMES[i]).zfill(3)}/hist_rgb_hell.txt', det, True)
