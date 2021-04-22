@@ -54,10 +54,24 @@ This week, we also implemented several post-processing functions to filter the h
 $ python w5_post_process_mtsc.py --input INPUT_FOLDER --output OUTPUT_FOLDER
  ```
  
+ ## Single-camera evaluation
+ 
  Now, the output folder can be evaluated using the script of single evaluation:
 
  ```
-$ python w5_run_metrics_single.py.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
+$ python w5_run_metrics_single.py -s SEQUENCE -c CAMERA -f INPUT_FOLDER
+ ```
+ 
+ Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
+ 
+ ## Multi-target multi-camera (MTMC) tracking
+ 
+ ## Multi-camera evaluation
+ 
+ Now, the output folder can be evaluated using a script very similar to the one used in single-camera evaluation:
+
+ ```
+$ python w5_run_metrics_single.py -s SEQUENCE -f INPUT_FOLDER
  ```
  
  Note: the DATA_PATH variable inside the 'utils.py' file should point to the challenge dataset.
