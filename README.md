@@ -9,7 +9,7 @@
 | Carmen García    | carmen.garciano@e-campus.uab.cat  |
 | Juan Chaves | juanvictor.chaves@e-campus.uab.cat |
 
-Project presentation: [Google Slides](https://docs.google.com/presentation/d/1FcZ90pkM3YXFWxmWFEbWw7z9L7LiFYNIy9Z9eVy9m_s/edit?usp=sharing)
+Project presentation: [Google Slides](https://docs.google.com/presentation/d/1FcZ90pkM3YXFWxmWFEbWw7z9L7LiFYNIy9Z9eVy9m_s/edit?usp=sharing). Final report: [Overleaf](https://www.overleaf.com/read/xpcdnbsqbkbx)
 
 # Index of contents
 The contents of this repository are structured following a temporal line throughout the 5 weekly tasks we have been working on.
